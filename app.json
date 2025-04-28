@@ -22,7 +22,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4Y2Nob25peHFtcHNueWVmaGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2OTM5NzksImV4cCI6MjA2MTI2OTk3OX0.IMnHT9qcXj4knSZFuFv97bx8Pc0ER_VR75UWPzANaQQ"
+    },
+    "plugins": ["expo-router"]
   }
 }

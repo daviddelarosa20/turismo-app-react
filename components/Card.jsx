@@ -4,6 +4,7 @@ export default function Card({
   imageUrl = "https://via.placeholder.com/300x200",
   title = "Título de la tarjeta",
   description = "Descripción de la tarjeta que puede ocupar varias líneas de texto para mostrar información detallada.",
+  direccion = "Dirección de la tarjeta",
   buttonText = "Ver más",
   onPress = () => console.log("Botón presionado"),
 }) {
@@ -12,7 +13,7 @@ export default function Card({
       {/* Imagen */}
       <Image
         source={{ uri: imageUrl }}
-        className="w-full h-48"
+        style={{ width: "100%", height: 192 }}
         resizeMode="cover"
       />
 
@@ -23,6 +24,9 @@ export default function Card({
 
         {/* Descripción */}
         <Text className="text-gray-600 mb-4">{description}</Text>
+
+        {/* Dirección */}
+        <Text className="text-gray-600 mb-4">{direccion}</Text>
 
         {/* Contenedor para botón alineado a la derecha */}
         <View className="flex-row justify-end">

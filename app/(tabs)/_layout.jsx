@@ -11,31 +11,21 @@ export default () => {
       <StatusBar style="auto" />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#1D4ED8",
-          tabBarStyle: {
-            backgroundColor: "#e1dcd0",
-            position: "absolute",
-            bottom: 0,
-          },
           headerTitleAlign: "center",
-          headerStyle: {
-            backgroundColor: "#e1dcd0",
-          },
+          headerStyle: { backgroundColor: "#e1dcd0" },
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => alert("Botón izquierdo presionado")}
-            >
-              <View className="ml-6">
+            <View className="items-center justify-center ml-3">
+              <TouchableOpacity onPress={() => alert("Menu")}>
                 <Feather name="menu" size={24} color="black" />
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={() => alert("Botón derecho presionado")}>
-              <View className="w-10 h-10 mr-4 rounded-full bg-slate-300 items-center justify-center">
-                <AntDesign name="user" size={28} color="black" />
-              </View>
-            </TouchableOpacity>
+            <View className="items-center justify-center mr-3 rounded-full bg-slate-100 p-2">
+              <TouchableOpacity onPress={() => alert("Perfil")}>
+                <AntDesign name="user" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       >
@@ -45,6 +35,7 @@ export default () => {
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="home" size={size} color={color} />
             ),
+            title: "Inicio",
           }}
         />
         <Tabs.Screen
@@ -53,6 +44,7 @@ export default () => {
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="search1" size={size} color={color} />
             ),
+            title: "Buscar",
           }}
         />
         <Tabs.Screen
@@ -61,6 +53,7 @@ export default () => {
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="setting" size={size} color={color} />
             ),
+            title: "Configuración",
           }}
         />
       </Tabs>

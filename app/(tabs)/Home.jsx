@@ -4,6 +4,7 @@ import Card from "../../components/Card";
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase/supabase";
 
+// Componente principal de la pantalla de inicio
 export default function Home() {
   const [categorias, setCategorias] = useState([]);
   const getCategorias = async () => {

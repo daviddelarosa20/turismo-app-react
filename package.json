@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@react-navigation/drawer": "^7.3.9",
+    "@react-navigation/native": "^7.1.6",
     "@supabase/supabase-js": "^2.49.4",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-prettier": "^5.2.6",

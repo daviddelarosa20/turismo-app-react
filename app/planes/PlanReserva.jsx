@@ -4,16 +4,18 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
+
   Image,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { useLayoutEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useRouter } from "expo-router";
 
-export default function PlanBasico() {
+export default function PlanReserva() {
   const navigation = useNavigation();
   const { title, description, direccion } = useLocalSearchParams();
+  const router = useRouter();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -21,7 +23,7 @@ export default function PlanBasico() {
       headerStyle: { backgroundColor: "#e1dcd0" },
       headerTitleAlign: "center",
       headerRight: () => (
-        <View style={styles.headerIcon}>
+        <View className="mr-3 p-2 rounded-full bg-gray-100">
           <TouchableOpacity onPress={() => alert("Perfil")}>
             <AntDesign name="user" size={24} color="black" />
           </TouchableOpacity>
@@ -31,15 +33,17 @@ export default function PlanBasico() {
   }, [navigation]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{title || "Nombre de la empresa"}</Text>
+    <ScrollView contentContainerStyle={{ alignItems: "center" }} className="bg-white p-4">
+      <Text className="text-lg font-semibold mt-2">
+        {title || "Nombre de la empresa"}
+      </Text>
 
       {/* Estrellas y rating */}
-      <View style={styles.ratingContainer}>
+      <View className="flex-row items-center my-2">
         {[...Array(5)].map((_, index) => (
           <AntDesign key={index} name="star" size={16} color="gold" />
         ))}
-        <Text style={styles.ratingText}>5.0</Text>
+        <Text className="ml-2 text-gray-500">5.0</Text>
       </View>
 
       {/* Imagen principal desde Supabase */}
@@ -47,133 +51,51 @@ export default function PlanBasico() {
         source={{
           uri: "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Dentista.jpg",
         }}
-        style={styles.image}
+        className="w-full h-72 rounded-xl mt-2 bg-gray-400"
       />
 
       {/* Información del lugar */}
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>Información del lugar</Text>
-        <Text style={styles.infoText}>
+      <View className="w-full mt-5">
+        <Text className="font-bold mb-2">Información del lugar</Text>
+        <Text className="text-sm text-gray-700">
           {description ||
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vel."}
         </Text>
 
-        {/* Indicadores de color */}
-        <View style={styles.colorBoxes}>
+        <View className="flex-row justify-around mt-4">
           {["#444", "#999", "#444", "#ccc"].map((color, idx) => (
             <View
               key={idx}
-              style={[styles.colorBox, { backgroundColor: color }]}
+              style={{ backgroundColor: color }}
+              className="w-8 h-8 rounded"
             />
           ))}
         </View>
       </View>
 
       {/* Dirección */}
-      <Text style={styles.sectionTitle}>Ubicación</Text>
-      <Text style={styles.infoText}>
+      <Text className="font-bold mt-6">Ubicación</Text>
+      <Text className="text-sm text-gray-700">
         {direccion || "Dirección no disponible"}
       </Text>
 
       {/* Imagen del mapa */}
-      <Text style={styles.sectionTitle}>Mapa</Text>
+      <Text className="font-bold mt-6">Mapa</Text>
       <Image
         source={{
-          uri: "https://example.com/mapa.jpg", // URL de la imagen del mapa
+          uri: "https://dbdzm869oupei.cloudfront.net/img/sticker/preview/38676.png",
         }}
-        style={styles.mapImage}
+        className="w-full h-72 rounded-xl mt-2 bg-gray-400"
       />
 
       {/* Botón de reserva */}
       <TouchableOpacity
-        style={styles.reserveButton}
-        onPress={() => alert("Reserva hecha!")}
+        className="mt-6 bg-green-200 px-8 py-3 rounded-full mb-10"
+         onPress={() => router.push("/Reserva")}
       >
-        <Text style={styles.reserveText}>Reservar</Text>
+        <Text className="font-semibold text-black">Reservar</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 10,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  ratingText: {
-    marginLeft: 6,
-    color: "gray",
-  },
-  image: {
-    width: "100%",
-    height: 300,
-    borderRadius: 12,
-    marginTop: 10,
-    backgroundColor: "#bbb",
-  },
-  mapImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-    marginTop: 10,
-    backgroundColor: "#bbb",
-  },
-  infoSection: {
-    marginTop: 20,
-    width: "100%",
-  },
-  infoTitle: {
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#444",
-  },
-  colorBoxes: {
-    flexDirection: "row",
-    marginTop: 12,
-    justifyContent: "space-around",
-  },
-  colorBox: {
-    width: 30,
-    height: 30,
-    borderRadius: 4,
-  },
-  sectionTitle: {
-    marginTop: 20,
-    fontWeight: "bold",
-  },
-  reserveButton: {
-    marginTop: 20,
-    backgroundColor: "#A8FFB4",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 20,
-    marginBottom: 40,
-  },
-  reserveText: {
-    color: "#000",
-    fontWeight: "600",
-  },
-  headerIcon: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-    borderRadius: 50,
-    backgroundColor: "#f1f1f1",
-    padding: 8,
-  },
-  //hola
-});

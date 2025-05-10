@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 const diasSemana = ["D", "L", "M", "Mi", "J", "V", "S"];
 
-const CalendarioSimple = () => {
+const CalendarioS = () => {
   const [fechaActual, setFechaActual] = useState(new Date());
   const [diasDelMes, setDiasDelMes] = useState([]);
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
@@ -21,7 +21,7 @@ const CalendarioSimple = () => {
 
     const diasArray = [];
 
-    // Rellenar espacios en blanco al inicio
+   
     for (let i = 0; i < primerDia; i++) {
       diasArray.push(null);
     }
@@ -52,14 +52,14 @@ const CalendarioSimple = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Días de la semana */}
+
       <View style={{ flexDirection: "row", justifyContent: "space-around", width: "90%" }}>
         {diasSemana.map((dia) => (
           <Text key={dia} style={{ width: 30, textAlign: "center", fontWeight: "bold" }}>{dia}</Text>
         ))}
       </View>
 
-      {/* Días del mes */}
+     
       <View style={{ flexDirection: "row", flexWrap: "wrap", width: "90%" }}>
         {diasDelMes.map((dia, index) => (
           <TouchableOpacity
@@ -85,4 +85,4 @@ const CalendarioSimple = () => {
   );
 };
 
-export default CalendarioSimple;
+export default CalendarioS;

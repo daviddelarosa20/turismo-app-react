@@ -46,7 +46,7 @@ export default function PlanReserva() {
         <Text className="ml-2 text-gray-500">5.0</Text>
       </View>
 
-      {/* Imagen principal desde Supabase */}
+    
       <Image
         source={{
           uri: "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Dentista.jpg",
@@ -54,7 +54,7 @@ export default function PlanReserva() {
         className="w-full h-72 rounded-xl mt-2 bg-gray-400"
       />
 
-      {/* Información del lugar */}
+      {/* Info del lugar */}
       <View className="w-full mt-5">
         <Text className="font-bold mb-2">Información del lugar</Text>
         <Text className="text-sm text-gray-700">
@@ -73,13 +73,13 @@ export default function PlanReserva() {
         </View>
       </View>
 
-      {/* Dirección */}
+     
       <Text className="font-bold mt-6">Ubicación</Text>
       <Text className="text-sm text-gray-700">
         {direccion || "Dirección no disponible"}
       </Text>
 
-      {/* Imagen del mapa */}
+      {/* Imagen del mapa ya luego ira el mapa real no feik */}
       <Text className="font-bold mt-6">Mapa</Text>
       <Image
         source={{
@@ -88,10 +88,12 @@ export default function PlanReserva() {
         className="w-full h-72 rounded-xl mt-2 bg-gray-400"
       />
 
-      {/* Botón de reserva */}
+
       <TouchableOpacity
         className="mt-6 bg-green-200 px-8 py-3 rounded-full mb-10"
-         onPress={() => router.push("/Reserva")}
+        onPress={() => {
+          router.push("/planes/Reserva");
+        }}
       >
         <Text className="font-semibold text-black">Reservar</Text>
       </TouchableOpacity>

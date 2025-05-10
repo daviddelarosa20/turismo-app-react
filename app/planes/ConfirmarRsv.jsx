@@ -16,7 +16,7 @@ export default function ConfirmarRsv() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "white" }}>
       <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>¡Reserva Confirmada!</Text>
-
+{/*esto será funcional despues jeje */}
       <View style={{ width: "100%", backgroundColor: "#f2f2f2", padding: 20, borderRadius: 10, marginBottom: 30 }}>
         <Text style={{ fontSize: 18, fontWeight: "500", marginBottom: 10 }}>Resumen:</Text>
         <Text style={{ fontSize: 16, marginBottom: 5 }}>📍 Restaurante: El Buen Sabor</Text>

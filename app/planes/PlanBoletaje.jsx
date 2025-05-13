@@ -15,10 +15,13 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import StarRating from "../../components/StarRating";
 import { supabase } from "../../supabase/supabase";
 import GoogleMap from "../../components/GoogleMap";
-import DatePicker from "../../components/DatePicker";
+import Calendario from "../../components/Calendario";
+import Asientos from "../../components/Asientos";
+import { useRouter } from "expo-router";
 
 export default function PlanBoletaje() {
   const navigation = useNavigation();
+  const router = useRouter();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -37,6 +40,7 @@ export default function PlanBoletaje() {
   const { title, description, direccion, imageUrl } = useLocalSearchParams();
 
   const [valoracion, setValoracion] = useState(null);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
   const getvaloracion = async () => {
     let { data: Valoracion, error } = await supabase
@@ -87,8 +91,21 @@ export default function PlanBoletaje() {
               <Text className="text-xl font-bold mb-2 ml-5">
                 Selecciona fecha
               </Text>
-              <View className="flex-row mt-3 w-full items-center justify-center gap-3">
-                <DatePicker />
+              <View className="mt-3 w-full items-center justify-center gap-3">
+                <Calendario
+                  onFechaSeleccionada={(fecha) => {
+                    setFechaSeleccionada(fecha);
+                    console.log(fecha);
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={() => router.push("/components/Asientos")}
+                  className="bg-purple-400 px-8 py-3 rounded-full mb-10"
+                >
+                  <Text className="font-semibold text-black">
+                    Seleccionar asientos
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>

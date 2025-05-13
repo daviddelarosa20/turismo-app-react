@@ -1,6 +1,6 @@
 import { Redirect } from "expo-router";
 import "../global.css";
-const StartPage = () => {
+const StartPage = () => { 
   return <Redirect href="/Home" />;
 };
 

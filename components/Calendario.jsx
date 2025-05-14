@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 const diasSemana = ["D", "L", "M", "Mi", "J", "V", "S"];
 
-const CalendarioS = () => {
+const CalendarioS = ({ onFechaSeleccionada }) => {
   const [fechaActual, setFechaActual] = useState(new Date());
   const [diasDelMes, setDiasDelMes] = useState([]);
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
@@ -21,7 +21,6 @@ const CalendarioS = () => {
 
     const diasArray = [];
 
-   
     for (let i = 0; i < primerDia; i++) {
       diasArray.push(null);
     }
@@ -34,50 +33,58 @@ const CalendarioS = () => {
   };
 
   const cambiarMes = (direccion) => {
-    const nuevoMes = new Date(fechaActual.setMonth(fechaActual.getMonth() + direccion));
+    const nuevoMes = new Date(
+      fechaActual.setMonth(fechaActual.getMonth() + direccion),
+    );
     setFechaActual(new Date(nuevoMes));
   };
 
   return (
-    <View style={{ alignItems: "center", marginVertical: 20 }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "90%", marginBottom: 10 }}>
+    <View className="items-center my-5">
+      <View className="flex-row justify-between w-[90%] mb-2.5">
         <TouchableOpacity onPress={() => cambiarMes(-1)}>
-          <Text style={{ fontSize: 18 }}>◀</Text>
+          <Text className="text-lg">◀</Text>
         </TouchableOpacity>
-        <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-          {fechaActual.toLocaleString("default", { month: "long" })} {fechaActual.getFullYear()}
+        <Text className="text-base font-bold">
+          {fechaActual.toLocaleString("default", { month: "long" })}{" "}
+          {fechaActual.getFullYear()}
         </Text>
         <TouchableOpacity onPress={() => cambiarMes(1)}>
-          <Text style={{ fontSize: 18 }}>▶</Text>
+          <Text className="text-lg">▶</Text>
         </TouchableOpacity>
       </View>
 
-
-      <View style={{ flexDirection: "row", justifyContent: "space-around", width: "90%" }}>
+      <View className="flex-row justify-around w-[90%]">
         {diasSemana.map((dia) => (
-          <Text key={dia} style={{ width: 30, textAlign: "center", fontWeight: "bold" }}>{dia}</Text>
+          <Text key={dia} className="w-[30px] text-center font-bold">
+            {dia}
+          </Text>
         ))}
       </View>
 
-     
-      <View style={{ flexDirection: "row", flexWrap: "wrap", width: "90%" }}>
+      <View className="flex-row flex-wrap w-[90%]">
         {diasDelMes.map((dia, index) => (
           <TouchableOpacity
             key={index}
             disabled={!dia}
-            onPress={() => setDiaSeleccionado(dia)}
-            style={{
-              width: "14.28%",
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-              marginVertical: 2,
-              backgroundColor: dia === diaSeleccionado ? "#facc15" : "#f4f4f5",
-              borderRadius: 6,
-              opacity: dia ? 1 : 0
+            onPress={() => {
+              setDiaSeleccionado(dia);
+              if (dia) {
+                const fechaSeleccionada = new Date(
+                  fechaActual.getFullYear(),
+                  fechaActual.getMonth(),
+                  dia,
+                );
+                onFechaSeleccionada && onFechaSeleccionada(fechaSeleccionada);
+              }
             }}
+            className={`w-[14.28%] h-10 justify-center items-center my-0.5 ${
+              dia === diaSeleccionado ? "bg-yellow-400" : "bg-zinc-100"
+            } rounded-md ${!dia ? "opacity-0" : "opacity-100"}`}
           >
-            <Text style={{ color: dia ? "#000" : "transparent" }}>{dia}</Text>
+            <Text className={`${dia ? "text-black" : "text-transparent"}`}>
+              {dia}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>

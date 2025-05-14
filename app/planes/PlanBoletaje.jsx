@@ -15,10 +15,11 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import StarRating from "../../components/StarRating";
 import { supabase } from "../../supabase/supabase";
 import GoogleMap from "../../components/GoogleMap";
-import DatePicker from "../../components/DatePicker";
+import { useRouter } from "expo-router";
 
 export default function PlanBoletaje() {
   const navigation = useNavigation();
+  const router = useRouter();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -69,7 +70,7 @@ export default function PlanBoletaje() {
             </View>
             <Image
               source={{ uri: imageUrl }}
-              style={{ width: 400, height: 400, borderRadius: 30 }}
+              className="w-full h-72 rounded-xl mt-2 bg-gray-400"
             />
             <Text className="text-xl font-bold mt-3 mr-64">
               Información del lugar
@@ -79,17 +80,21 @@ export default function PlanBoletaje() {
             </Text>
             <Text className="text-lg font-normal mb-2 mr-30">{direccion}</Text>
             <View className="w-full h-60 mt-2">
-              <View className="w-full h-60 mt-24 mb-40">
+              <View className="w-full h-60 mt-28 mb-5">
                 <GoogleMap />
               </View>
             </View>
-            <View className="w-full mt-48 mb-2">
-              <Text className="text-xl font-bold mb-2 ml-5">
-                Selecciona fecha
-              </Text>
-              <View className="flex-row mt-3 w-full items-center justify-center gap-3">
-                <DatePicker />
-              </View>
+            <View>
+              <TouchableOpacity
+                className="mt-60 bg-green-200 px-8 py-3 rounded-full mb-5"
+                onPress={() => {
+                  router.push("/planes/Evento");
+                }}
+              >
+                <Text className="font-semibold text-black">
+                  Ver próximos eventos
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

@@ -15,6 +15,14 @@ export default function Reserva() {
   const [hora, setHora] = useState();
   const [turno, setTurno] = useState(null);
 
+  function chunkArray(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  }
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Reservar",
@@ -160,51 +168,55 @@ export default function Reserva() {
 
       <Text className="mt-4 mb-2 font-semibold">Seleccionar hora:</Text>
 
-      <View className="flex-row justify-around my-2">
-        {["Mañana", "Tarde", "Noche"].map((rango) => (
+<View className="flex-row justify-around my-2">
+  {["Mañana", "Tarde", "Noche"].map((rango) => (
+    <TouchableOpacity
+      key={rango}
+      onPress={() => {
+        setTurno(rango);
+        setHora(null);
+      }}
+      style={{
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: turno === rango ? "#facc15" : "#fef3c7",
+        borderRadius: 10,
+        marginHorizontal: 5,
+      }}
+    >
+      <Text style={{ fontWeight: "bold" }}>{rango}</Text>
+    </TouchableOpacity>
+  ))}
+</View>
+
+{turno && (
+  <View style={{ paddingHorizontal: 10, marginTop: 10 }}>
+    {chunkArray(obtenerHoras(), 3).map((fila, filaIndex) => (
+      <View
+        key={filaIndex}
+        style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}
+      >
+        {fila.map((horaItem) => (
           <TouchableOpacity
-            key={rango}
-            onPress={() => {
-              setTurno(rango);
-              setHora(null);
-            }}
+            key={horaItem}
+            onPress={() => setHora(horaItem)}
             style={{
-              paddingHorizontal: 20,
-              paddingVertical: 10,
-              backgroundColor: turno === rango ? "#facc15" : "#fef3c7",
-              borderRadius: 10,
+              flex: 1,
               marginHorizontal: 5,
+              backgroundColor: hora === horaItem ? "#fde68a" : "#e5e7eb",
+              paddingVertical: 12,
+              borderRadius: 10,
+              alignItems: "center",
             }}
           >
-            <Text style={{ fontWeight: "bold" }}>{rango}</Text>
+            <Text>{horaItem}</Text>
           </TouchableOpacity>
         ))}
       </View>
+    ))}
+  </View>
+)}
 
-      {turno && (
-        <FlatList
-          data={obtenerHoras()}
-          keyExtractor={(item) => item}
-          numColumns={3}
-          columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
-          contentContainerStyle={{ paddingHorizontal: 10, marginTop: 10 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => setHora(item)}
-              style={{
-                flex: 1,
-                margin: 5,
-                backgroundColor: hora === item ? "#fde68a" : "#e5e7eb",
-                paddingVertical: 12,
-                borderRadius: 10,
-                alignItems: "center",
-              }}
-            >
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
 
       <TouchableOpacity
         className="bg-green-200 p-3 rounded-full items-center mt-6"

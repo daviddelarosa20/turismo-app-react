@@ -75,7 +75,7 @@ export default function Reserva() {
       empresa: empresa?.Nombre || title,
     });
 
-    console.log("🔎 TIPOS:");
+    console.log("TIPOS:");
     console.log({
       nombre: typeof nombre,
       telefono: typeof telefono,

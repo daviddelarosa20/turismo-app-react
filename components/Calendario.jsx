@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 const diasSemana = ["D", "L", "M", "Mi", "J", "V", "S"];
 
-const CalendarioS = () => {
+const CalendarioS = ({ onSelectFecha }) => {
   const [fechaActual, setFechaActual] = useState(new Date());
   const [diasDelMes, setDiasDelMes] = useState([]);
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
@@ -21,7 +21,6 @@ const CalendarioS = () => {
 
     const diasArray = [];
 
-   
     for (let i = 0; i < primerDia; i++) {
       diasArray.push(null);
     }
@@ -38,6 +37,17 @@ const CalendarioS = () => {
     setFechaActual(new Date(nuevoMes));
   };
 
+  const seleccionarDia = (dia) => {
+    setDiaSeleccionado(dia);
+
+    const año = fechaActual.getFullYear();
+    const mes = fechaActual.getMonth() + 1; 
+    const fechaFormateada = `${año}-${mes.toString().padStart(2, "0")}-${dia.toString().padStart(2, "0")}`;
+    
+    
+    if (onSelectFecha) onSelectFecha(fechaFormateada);
+  };
+
   return (
     <View style={{ alignItems: "center", marginVertical: 20 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "90%", marginBottom: 10 }}>
@@ -52,20 +62,18 @@ const CalendarioS = () => {
         </TouchableOpacity>
       </View>
 
-
       <View style={{ flexDirection: "row", justifyContent: "space-around", width: "90%" }}>
         {diasSemana.map((dia) => (
           <Text key={dia} style={{ width: 30, textAlign: "center", fontWeight: "bold" }}>{dia}</Text>
         ))}
       </View>
 
-     
       <View style={{ flexDirection: "row", flexWrap: "wrap", width: "90%" }}>
         {diasDelMes.map((dia, index) => (
           <TouchableOpacity
             key={index}
             disabled={!dia}
-            onPress={() => setDiaSeleccionado(dia)}
+            onPress={() => seleccionarDia(dia)}
             style={{
               width: "14.28%",
               height: 40,

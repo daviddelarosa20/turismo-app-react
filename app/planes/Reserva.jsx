@@ -39,7 +39,7 @@ export default function Reserva() {
         .eq("Nombre", title)
         .single();
 
-      console.log("🚀 Empresa recibida:", data);
+      console.log("Empresa recibida:", data);
       if (error) console.error("Error al obtener empresa:", error);
       else setEmpresa(data);
     }
@@ -65,7 +65,7 @@ export default function Reserva() {
   };
 
   async function guardarReserva() {
-    console.log("📤 Intentando guardar reserva con:");
+    console.log("Intentando guardar reserva con:");
     console.log({
       nombre,
       telefono,

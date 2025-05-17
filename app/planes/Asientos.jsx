@@ -123,7 +123,16 @@ export default function Asientos() {
       }
     };
 
+    // Ejecutar cuando el componente se monta
     obtenerEstadosAsientos();
+
+    // Agregar listener para cuando la pantalla se enfoca
+    const unsubscribe = navigation.addListener('focus', () => {
+      obtenerEstadosAsientos();
+    });
+
+    // Limpiar el listener cuando el componente se desmonta
+    return () => unsubscribe();
   }, []);
 
   // Función para cambiar el estado de un asiento
@@ -288,7 +297,7 @@ export default function Asientos() {
       headerStyle: { backgroundColor: "#e1dcd0" },
       headerTitleAlign: "center",
     });
-  }, []);
+  }, [navigation]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">

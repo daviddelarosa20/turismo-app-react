@@ -1,6 +1,6 @@
 import { Text, View, Image, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { supabase } from '../../supabase/supabase';
 
 export default function Pago() {
@@ -10,6 +10,21 @@ export default function Pago() {
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [cvv, setCvv] = useState('');
   const [costo, setCosto] = useState(0);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Pago',
+      headerStyle: {
+        backgroundColor: '#fff',
+      },
+      headerTintColor: '#000',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        textAlign: 'center',
+      },
+    });
+  }, [navigation]);
 
 // Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
   // React.useEffect(() => {

@@ -1,9 +1,10 @@
 import { Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { supabase } from '../../supabase/supabase';
 
 export default function ConfirmacionB() {
+  const navigation = useNavigation();
   const { 
     Title, 
     Description, 
@@ -19,6 +20,21 @@ export default function ConfirmacionB() {
     asientosIDs,
     idEvento
   } = useLocalSearchParams();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Confirmación',
+      headerStyle: {
+        backgroundColor: '#fff',
+      },
+      headerTintColor: '#000',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        textAlign: 'center',
+      },
+    });
+  }, [navigation]);
 
   // Convertir el costo a número si es necesario
   const costoNumero = typeof costo === 'string' ? parseFloat(costo) : costo;
@@ -120,7 +136,7 @@ export default function ConfirmacionB() {
                           </View>
                         </View>
                         <View className="bg-green-100 px-2 py-1 rounded-full">
-                          <Text className="text-green-600 font-medium text-xs">Reservado</Text>
+                          <Text className="text-green-600 font-medium text-xs">Comprado</Text>
                         </View>
                       </View>
                     ))}
@@ -183,15 +199,15 @@ export default function ConfirmacionB() {
                     // Mostrar mensaje de éxito
                     await alert('Pago confirmado con éxito! Los asientos han sido comprados.');
                     
-                    // Navegar al grupo de tabs y luego a la pantalla de Home
-                    navigation.navigate('/(tabs)/Home');
+                    // Navegar a la pantalla Home dentro del grupo de tabs
+                    navigation.navigate('(tabs)', { screen: 'Home' });
                   } catch (error) {
                     console.error('Error al confirmar la compra:', error);
                     await alert('Error al confirmar la compra. Por favor, inténtelo de nuevo.');
                   }
                 }}
               >
-                <Text className="text-white font-medium text-center text-sm">Confirmar Reserva</Text>
+                <Text className="text-white font-medium text-center text-sm">Confirmar Compra</Text>
               </TouchableOpacity>
             </View>
           </View>

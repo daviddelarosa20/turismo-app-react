@@ -28,7 +28,7 @@ export default function Perfil() {
       const { data, error } = await supabase
         .from("Users")
         .select("idUser, Nombre, Apellido, Email, Telefono, Apodo")
-        .eq("Apodo", "KarolVel11A") // apodo fijo inicial (puede ser de sesión luego)
+        .eq("Apodo", "jonahdezd") // apodo fijo inicial (puede ser de sesión luego)
         .single();
 
       if (error) {

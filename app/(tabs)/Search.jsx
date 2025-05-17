@@ -41,29 +41,25 @@
         const { data, error } = await supabase
           .from('Categorias')
           .select('idCategoria, Nombre');
-  
+        
         if (error) {
           console.error("Error fetching filters:", error);
         } else {
-          const formatted = data.map((item, index) => ({
+          const formatted = data.map((item) => ({
             id: item.idCategoria,
             name: item.Nombre,
-            active: index === 0, // El primero activo
+            active: false,
           }));
-  
-          console.log("Filtros traídos de Supabase:", formatted); // 👈 Aquí se imprime
-
-          setFilters(formatted);
+    
+          // Agregar el filtro especial "Todas"
+          const allOption = { id: 0, name: "Todas", active: true, isAll: true }; // activo por defecto
+    
+          setFilters([allOption, ...formatted]);
         }
       };
-  
+    
       fetchFilters();
     }, []);
-
-    const [availableFilters, setAvailableFilters] = useState([
-      { id: 5, name: "Filter 5", canBeDeleted: true},
-      { id: 6, name: "Filter 6", canBeDeleted: true },
-    ]);
 
     const toggleFilter = (id) => {
       setFilters((prev) =>
@@ -71,60 +67,91 @@
       );
     };
 
-    const deleteFilter = (id) => {
-      const removed = filters.find((f) => f.id === id);
-      if (removed) {
-        setFilters((prev) => prev.filter((f) => f.id !== id));
-        setAvailableFilters((prev) => [...prev, removed]);
-      }
-    };
 
-    const addFilter = (id) => {
-      const toAdd = availableFilters.find((f) => f.id === id);
-      if (toAdd) {
-        setAvailableFilters((prev) => prev.filter((f) => f.id !== id));
-        setFilters((prev) => [...prev, toAdd]);
-      }
-    };  
 
     const [filtersBackup, setFiltersBackup] = useState([]);
-    const [availableFiltersBackup, setAvailableFiltersBackup] = useState([]);
     const openFilters = () => {
       setFiltersBackup(JSON.parse(JSON.stringify(filters)));
-      setAvailableFiltersBackup(JSON.parse(JSON.stringify(availableFilters)));
       setShowFilters(true);
     };  
 
     const [empresas, setEmpresas] = useState([]);
+
+    const handleFilterClick = (id) => {
+      setFilters((prev) => {
+        const clickedFilter = prev.find((f) => f.id === id);
+        const isAll = clickedFilter.isAll;
+    
+        if (isAll) {
+          // Si se selecciona "Todas", desactivar los demás
+          return prev.map((f) => ({
+            ...f,
+            active: f.isAll,
+          }));
+        } else {
+          const updated = prev.map((f) => {
+            if (f.isAll) return { ...f, active: false };
+            if (f.id === id) return { ...f, active: !f.active };
+            return f;
+          });
+    
+          const alMenosUnoActivo = updated.some((f) => f.active);
+    
+          // Si ninguno queda activo, activar "Todas"
+          if (!alMenosUnoActivo) {
+            return prev.map((f) => ({
+              ...f,
+              active: f.isAll,
+            }));
+          }
+    
+          return updated;
+        }
+      });
+    };
+    
+    
 
     const [esBusquedaLocal, setEsBusquedaLocal] = useState(false);
 
     const buscarEmpresas = async (texto) => {
       const textoMinuscula = texto.toLowerCase();
     
-      // Obtener todas las categorías activas
-      const categoriasActivas = filters.filter(f => f.active).map(f => f.id);
+      const filtrosActivos = filters.filter(f => f.active);
     
-      if (categoriasActivas.length === 0) {
-        console.warn("No hay categorías activas seleccionadas");
-        return;
-      }
+      const todasActiva = filtrosActivos.some(f => f.isAll);
     
-      // Coincidencias locales
       const coincidenciasLocales = busquedasRecientes.filter((b) =>
         b.toLowerCase().includes(textoMinuscula)
       );
     
-      // Supabase: buscar empresas con nombre que coincida Y categoría activa
-      const { data, error } = await supabase
-        .from('Empresas')
-        .select('Nombre')
-        .ilike('Nombre', `%${texto}%`)
-        .in('idCategoria', categoriasActivas); // 👈 múltiples categorías
-    
       let coincidenciasRemotas = [];
-      if (!error && data) {
-        coincidenciasRemotas = data.map((empresa) => empresa.Nombre);
+    
+      if (todasActiva) {
+        // Buscar sin filtrar por categoría
+        const { data, error } = await supabase
+          .from('Empresas')
+          .select('Nombre')
+          .ilike('Nombre', `%${texto}%`);
+    
+        if (!error && data) {
+          coincidenciasRemotas = data.map((empresa) => empresa.Nombre);
+        }
+      } else {
+        // Obtener IDs de filtros activos normales
+        const categoriasActivas = filtrosActivos.map(f => f.id);
+    
+        if (categoriasActivas.length > 0) {
+          const { data, error } = await supabase
+            .from('Empresas')
+            .select('Nombre')
+            .ilike('Nombre', `%${texto}%`)
+            .in('idCategoria', categoriasActivas);
+    
+          if (!error && data) {
+            coincidenciasRemotas = data.map((empresa) => empresa.Nombre);
+          }
+        }
       }
     
       // Unificar resultados y eliminar duplicados
@@ -141,6 +168,7 @@
     
       setEmpresas(nombresUnicos);
     };
+    
        
     
 
@@ -255,7 +283,6 @@
               <TouchableOpacity
             onPress={() => {
               setFilters(filtersBackup); 
-              setAvailableFilters(availableFiltersBackup);
                 setShowFilters(false);       
             }}
             >
@@ -285,28 +312,13 @@
                 </TouchableOpacity>
               ) : (
                 <Switch
-                  value={filter.active}
-                  onValueChange={() => toggleFilter(filter.id)}
-                />
+  value={filter.active}
+  onValueChange={() => handleFilterClick(filter.id)}
+/>
               )}
               </View>
             ))}
 
-  {/*para volver a agregarlos*/}
-  {availableFilters.length > 0 && (
-    <View style={{ marginTop: 30 }}>
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Agregar Filtros</Text>
-      {availableFilters.map((filter) => (
-        <TouchableOpacity
-          key={filter.id}
-          style={styles.addFilterButton}
-          onPress={() => addFilter(filter.id)}
-        >
-          <Text>+ {filter.name}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  )}
 
             {/* Botones */}
             <View style={styles.buttonRow}>
@@ -314,7 +326,6 @@
             style={[styles.button, { backgroundColor: "#ccc" }]}
             onPress={() => {
               setFilters(filtersBackup);    
-              setAvailableFilters(availableFiltersBackup); 
               setShowFilters(false);        
             }}
             >

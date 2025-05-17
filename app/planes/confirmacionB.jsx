@@ -20,6 +20,15 @@ export default function ConfirmacionB() {
     idEvento
   } = useLocalSearchParams();
 
+  // Convertir el costo a número si es necesario
+  const costoNumero = typeof costo === 'string' ? parseFloat(costo) : costo;
+
+  // Verificar si el costo es un número válido
+  if (isNaN(costoNumero)) {
+    console.error('Error: costo no es un número válido:', costo);
+    return null;
+  }
+
   // Verificar si el idEvento es undefined
   if (typeof idEvento === 'undefined') {
     console.error('Error: idEvento es undefined');
@@ -76,9 +85,9 @@ export default function ConfirmacionB() {
                 </View>
                 <View className="flex-row justify-between items-center text-sm">
                   <Text className="text-gray-600">Costo total</Text>
-                  <Text className="font-medium text-green-600">${costo}</Text>
+                  <Text className="font-medium text-green-600">${costoNumero.toFixed(2)}</Text>
                 </View>
-                {costo > 0 && (
+                {costoNumero > 0 && (
                   <View className="space-y-2">
                     <View className="flex-row justify-between items-center text-sm border-t border-gray-200 pt-2">
                       <Text className="text-gray-600">Tarjeta de crédito</Text>
@@ -172,13 +181,13 @@ export default function ConfirmacionB() {
                     }
 
                     // Mostrar mensaje de éxito
-                    await alert('Pago confirmado con éxito! Los asientos han sido reservados.');
+                    await alert('Pago confirmado con éxito! Los asientos han sido comprados.');
                     
                     // Navegar al grupo de tabs y luego a la pantalla de Home
                     navigation.navigate('/(tabs)/Home');
                   } catch (error) {
-                    console.error('Error al confirmar la reserva:', error);
-                    await alert('Error al confirmar la reserva. Por favor, inténtelo de nuevo.');
+                    console.error('Error al confirmar la compra:', error);
+                    await alert('Error al confirmar la compra. Por favor, inténtelo de nuevo.');
                   }
                 }}
               >

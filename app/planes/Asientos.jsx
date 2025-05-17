@@ -242,7 +242,7 @@ export default function Asientos() {
         Hora,
         asientosSeleccionados: JSON.stringify(asientosSeleccionadosArray),
         cantidadAsientos: asientosSeleccionadosArray.length,
-        costoTotal: costoTotal,
+        costo: costoTotal,
         asientosIDs: JSON.stringify(asientosData.map(asiento => asiento.idAsiento)),
         idEvento: eventoId // Usar el eventoId obtenido
       });

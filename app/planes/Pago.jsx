@@ -4,13 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/supabase';
 
 export default function Pago() {
-  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos } = useLocalSearchParams();
+  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos, idEvento: eventoId } = useLocalSearchParams();
   const navigation = useNavigation();
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [cvv, setCvv] = useState('');
   const [costo, setCosto] = useState(0);
-  const [eventoId, setEventoId] = useState(null);
 
 // Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
   // React.useEffect(() => {
@@ -59,25 +58,12 @@ export default function Pago() {
         const costoTotal = evento.Costo * (cantidadAsientos || 1);
         console.log('Costo total calculado:', costoTotal);
         
+        // Guardar el costo y el idEvento
+        setCosto(costoTotal);
+        setEventoId(evento.idEvento);
+
         // Si el costo es 0, redirigir inmediatamente a confirmacionB
         if (costoTotal === 0) {
-          // Obtener el idEvento
-          const { data: evento, error: eventoError } = await supabase
-            .from('Eventos')
-            .select('idEvento')
-            .eq('Titulo', Title)
-            .single();
-
-          if (eventoError) {
-            console.error('Error al obtener el idEvento:', eventoError);
-            return;
-          }
-
-          if (!evento) {
-            console.error('Evento no encontrado:', Title);
-            return;
-          }
-
           // Navegar a confirmacionB con el idEvento
           navigation.navigate('planes/confirmacionB', {
             Title,
@@ -91,31 +77,10 @@ export default function Pago() {
             fechaVencimiento: 'N/A',
             cvv: 'N/A',
             asientosSeleccionados,
-            idEvento: eventoData.idEvento
+            idEvento: evento.idEvento
           });
           return;
         }
-
-        // Obtener el idEvento para la navegación a confirmacionB
-        const { data: eventoData, error: eventoError1 } = await supabase
-          .from('Eventos')
-          .select('idEvento')
-          .eq('Titulo', Title)
-          .single();
-
-        if (eventoError1) {
-          console.error('Error al obtener el idEvento:', eventoError1);
-          return;
-        }
-
-        if (!eventoData) {
-          console.error('Evento no encontrado:', Title);
-          return;
-        }
-
-        // Guardar el costo y el idEvento
-        setCosto(costoTotal);
-        // Guardar el idEvento en una variable para usarlo en la navegación
         const eventoId = eventoData.idEvento;
         setEventoId(eventoId);
       } catch (error) {
@@ -224,7 +189,7 @@ export default function Pago() {
                     const { data: asientoData, error: asientoError } = await supabase
                       .from('Asientos')
                       .select('idAsiento')
-                      .eq('idEvento', eventoId)
+                      .eq('idEvento', parseInt(eventoId)) // Convertir a número
                       .eq('Fila', asiento.Fila)
                       .eq('Columna', asiento.Columna)
                       .single();
@@ -240,14 +205,14 @@ export default function Pago() {
                     Imagen,
                     Fecha,
                     Hora,
-                    cantidadAsientos: asientosSeleccionados ? asientosSeleccionados.length : 0,
+                    cantidadAsientos,
                     costo,
                     numeroTarjeta: numeroTarjeta.slice(-4), // Solo mostrar los últimos 4 dígitos
                     fechaVencimiento,
                     cvv: cvv.slice(-2), // Solo mostrar los últimos 2 dígitos del CVV
                     asientosSeleccionados: asientosSeleccionados, // Ya viene como string de Asientos.jsx
                     asientosIDs: JSON.stringify(asientosIDs),
-                    idEvento: eventoId // Pasar el idEvento obtenido anteriormente
+                    idEvento: eventoId // Usar el eventoId guardado en el estado
                   });
                 } catch (error) {
                   console.error('Error al procesar el pago:', error);

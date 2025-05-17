@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 const diasSemana = ["D", "L", "M", "Mi", "J", "V", "S"];
 
-const CalendarioS = ({ onFechaSeleccionada }) => {
+const CalendarioS = ({ onSelectFecha }) => {
   const [fechaActual, setFechaActual] = useState(new Date());
   const [diasDelMes, setDiasDelMes] = useState([]);
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
@@ -39,6 +39,17 @@ const CalendarioS = ({ onFechaSeleccionada }) => {
     setFechaActual(new Date(nuevoMes));
   };
 
+  const seleccionarDia = (dia) => {
+    setDiaSeleccionado(dia);
+
+    const año = fechaActual.getFullYear();
+    const mes = fechaActual.getMonth() + 1; 
+    const fechaFormateada = `${año}-${mes.toString().padStart(2, "0")}-${dia.toString().padStart(2, "0")}`;
+    
+    
+    if (onSelectFecha) onSelectFecha(fechaFormateada);
+  };
+
   return (
     <View className="items-center my-5">
       <View className="flex-row justify-between w-[90%] mb-2.5">
@@ -54,7 +65,7 @@ const CalendarioS = ({ onFechaSeleccionada }) => {
         </TouchableOpacity>
       </View>
 
-      <View className="flex-row justify-around w-[90%]">
+      <View style={{ flexDirection: "row", justifyContent: "space-around", width: "90%" }}>
         {diasSemana.map((dia) => (
           <Text key={dia} className="w-[30px] text-center font-bold">
             {dia}
@@ -62,21 +73,21 @@ const CalendarioS = ({ onFechaSeleccionada }) => {
         ))}
       </View>
 
-      <View className="flex-row flex-wrap w-[90%]">
+      <View style={{ flexDirection: "row", flexWrap: "wrap", width: "90%" }}>
         {diasDelMes.map((dia, index) => (
           <TouchableOpacity
             key={index}
             disabled={!dia}
-            onPress={() => {
-              setDiaSeleccionado(dia);
-              if (dia) {
-                const fechaSeleccionada = new Date(
-                  fechaActual.getFullYear(),
-                  fechaActual.getMonth(),
-                  dia,
-                );
-                onFechaSeleccionada && onFechaSeleccionada(fechaSeleccionada);
-              }
+            onPress={() => seleccionarDia(dia)}
+            style={{
+              width: "14.28%",
+              height: 40,
+              justifyContent: "center",
+              alignItems: "center",
+              marginVertical: 2,
+              backgroundColor: dia === diaSeleccionado ? "#facc15" : "#f4f4f5",
+              borderRadius: 6,
+              opacity: dia ? 1 : 0
             }}
             className={`w-[14.28%] h-10 justify-center items-center my-0.5 ${
               dia === diaSeleccionado ? "bg-yellow-400" : "bg-zinc-100"

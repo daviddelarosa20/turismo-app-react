@@ -165,19 +165,27 @@ export default function Asientos() {
         return;
       }
 
-      // Obtener el costo del evento para determinar si es gratuito
-      const { data: costoEvento, error: costoError } = await supabase
+      // Obtener el costo del evento y el idEvento
+      const { data: eventoData, error: eventoError1 } = await supabase
         .from('Eventos')
-        .select('Costo')
+        .select('Costo, idEvento')
         .eq('Titulo', Title)
         .single();
 
-      if (costoError) throw costoError;
-      if (!costoEvento) throw new Error('Evento no encontrado');
+      if (eventoError1) throw eventoError1;
+      if (!eventoData) throw new Error('Evento no encontrado');
+      if (!eventoData.idEvento) throw new Error('No se encontró el idEvento');
 
-      // Calcular el costo total
-      const costoTotal = costoEvento.Costo * asientosSeleccionadosArray.length;
+      // Guardar el idEvento y el costo en variables para usarlas en la navegación
+      const eventoId = eventoData.idEvento;
+      const costoTotal = eventoData.Costo * asientosSeleccionadosArray.length;
       console.log('Costo total calculado:', costoTotal);
+
+      console.log('Datos del evento:', { 
+        costo: eventoData.Costo,
+        idEvento: eventoData.idEvento,
+        titulo: Title
+      });
 
       // Si el evento es gratuito, redirigir directamente a confirmacionB
       if (costoTotal === 0) {
@@ -187,26 +195,32 @@ export default function Asientos() {
           Imagen,
           Fecha,
           Hora,
+          asientosSeleccionados: JSON.stringify(asientosSeleccionadosArray),
           cantidadAsientos: asientosSeleccionadosArray.length,
           costo: 0,
           numeroTarjeta: 'GRATIS',
           fechaVencimiento: 'N/A',
           cvv: 'N/A',
-          asientosSeleccionados: JSON.stringify(asientosSeleccionadosArray)
+          asientosSeleccionados: JSON.stringify(asientosSeleccionadosArray),
+          asientosIDs: JSON.stringify(asientosSeleccionadosArray.map(asiento => asiento.Fila + asiento.Columna)),
+          idEvento: eventoId // Usar la variable guardada
         });
         return;
       }
 
-      // Obtener los IDs de los asientos seleccionados
-      const columnas = asientosSeleccionadosArray.map(asiento => asiento.Columna);
-      console.log('Columnas a buscar:', columnas);
-      
+      // Obtener los asientos seleccionados
       const { data: asientosData, error: fetchError } = await supabase
         .from('Asientos')
-        .select('idAsiento')
+        .select('*')
         .eq('idEvento', evento.idEvento)
         .in('Fila', asientosSeleccionadosArray.map(asiento => asiento.Fila))
-        .in('Columna', columnas);
+        .in('Columna', asientosSeleccionadosArray.map(asiento => asiento.Columna));
+
+      if (fetchError) throw fetchError;
+      if (!asientosData || asientosData.length === 0) {
+        Alert.alert('Error', 'No se encontraron asientos con los criterios especificados');
+        return;
+      }
 
       if (fetchError) throw fetchError;
       if (!asientosData || asientosData.length === 0) {
@@ -228,7 +242,9 @@ export default function Asientos() {
         Hora,
         asientosSeleccionados: JSON.stringify(asientosSeleccionadosArray),
         cantidadAsientos: asientosSeleccionadosArray.length,
-        costoTotal: costoTotal // Pasar el costo total calculado
+        costoTotal: costoTotal,
+        asientosIDs: JSON.stringify(asientosData.map(asiento => asiento.idAsiento)),
+        idEvento: eventoId // Usar el eventoId obtenido
       });
 
       // Limpiar los asientos seleccionados después de la navegación

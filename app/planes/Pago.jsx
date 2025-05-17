@@ -10,6 +10,7 @@ export default function Pago() {
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [cvv, setCvv] = useState('');
   const [costo, setCosto] = useState(0);
+  const [eventoId, setEventoId] = useState(null);
 
 // Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
   // React.useEffect(() => {
@@ -60,11 +61,63 @@ export default function Pago() {
         
         // Si el costo es 0, redirigir inmediatamente a confirmacionB
         if (costoTotal === 0) {
-          setCosto(0);
+          // Obtener el idEvento
+          const { data: evento, error: eventoError } = await supabase
+            .from('Eventos')
+            .select('idEvento')
+            .eq('Titulo', Title)
+            .single();
+
+          if (eventoError) {
+            console.error('Error al obtener el idEvento:', eventoError);
+            return;
+          }
+
+          if (!evento) {
+            console.error('Evento no encontrado:', Title);
+            return;
+          }
+
+          // Navegar a confirmacionB con el idEvento
+          navigation.navigate('planes/confirmacionB', {
+            Title,
+            Description,
+            Imagen,
+            Fecha,
+            Hora,
+            cantidadAsientos,
+            costo: 0,
+            numeroTarjeta: 'GRATIS',
+            fechaVencimiento: 'N/A',
+            cvv: 'N/A',
+            asientosSeleccionados,
+            idEvento: eventoData.idEvento
+          });
           return;
         }
 
+        // Obtener el idEvento para la navegación a confirmacionB
+        const { data: eventoData, error: eventoError1 } = await supabase
+          .from('Eventos')
+          .select('idEvento')
+          .eq('Titulo', Title)
+          .single();
+
+        if (eventoError1) {
+          console.error('Error al obtener el idEvento:', eventoError1);
+          return;
+        }
+
+        if (!eventoData) {
+          console.error('Evento no encontrado:', Title);
+          return;
+        }
+
+        // Guardar el costo y el idEvento
         setCosto(costoTotal);
+        // Guardar el idEvento en una variable para usarlo en la navegación
+        const eventoId = eventoData.idEvento;
+        setEventoId(eventoId);
       } catch (error) {
         console.error('Error al obtener el costo:', error);
       }
@@ -167,6 +220,20 @@ export default function Pago() {
                   }
 
                   // Navegar a la página de confirmación con los datos
+                  const asientosIDs = await Promise.all(JSON.parse(asientosSeleccionados).map(async (asiento) => {
+                    const { data: asientoData, error: asientoError } = await supabase
+                      .from('Asientos')
+                      .select('idAsiento')
+                      .eq('idEvento', eventoId)
+                      .eq('Fila', asiento.Fila)
+                      .eq('Columna', asiento.Columna)
+                      .single();
+
+                    if (asientoError) throw asientoError;
+                    if (!asientoData) throw new Error('Asiento no encontrado');
+                    return asientoData.idAsiento;
+                  }));
+
                   navigation.navigate('planes/confirmacionB', {
                     Title,
                     Description,
@@ -178,7 +245,9 @@ export default function Pago() {
                     numeroTarjeta: numeroTarjeta.slice(-4), // Solo mostrar los últimos 4 dígitos
                     fechaVencimiento,
                     cvv: cvv.slice(-2), // Solo mostrar los últimos 2 dígitos del CVV
-                    asientosSeleccionados: asientosSeleccionados // Ya viene como string de Asientos.jsx
+                    asientosSeleccionados: asientosSeleccionados, // Ya viene como string de Asientos.jsx
+                    asientosIDs: JSON.stringify(asientosIDs),
+                    idEvento: eventoId // Pasar el idEvento obtenido anteriormente
                   });
                 } catch (error) {
                   console.error('Error al procesar el pago:', error);

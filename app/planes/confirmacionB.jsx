@@ -1,6 +1,7 @@
 import { Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import React from 'react';
+import { supabase } from '../../supabase/supabase';
 
 export default function ConfirmacionB() {
   const { 
@@ -14,12 +15,31 @@ export default function ConfirmacionB() {
     numeroTarjeta,
     fechaVencimiento,
     cvv,
-    asientosSeleccionados
+    asientosSeleccionados,
+    asientosIDs,
+    idEvento
   } = useLocalSearchParams();
+
+  // Verificar si el idEvento es undefined
+  if (typeof idEvento === 'undefined') {
+    console.error('Error: idEvento es undefined');
+    console.error('Parámetros recibidos:', {
+      Title,
+      idEvento,
+      asientosSeleccionados
+    });
+    throw new Error('idEvento no recibido correctamente');
+  }
 
   // Convertir strings a números cuando sea necesario
   const cantidad = parseInt(cantidadAsientos) || 0;
-  const costoNumero = parseFloat(costo) || 0;
+  // Usar el costo directamente del parámetro, ya que ya es un número
+
+  console.log('Datos recibidos:', {
+    Title,
+    idEvento,
+    asientosSeleccionados
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -56,9 +76,9 @@ export default function ConfirmacionB() {
                 </View>
                 <View className="flex-row justify-between items-center text-sm">
                   <Text className="text-gray-600">Costo total</Text>
-                  <Text className="font-medium text-green-600">${costoNumero.toFixed(2)}</Text>
+                  <Text className="font-medium text-green-600">${costo}</Text>
                 </View>
-                {costoNumero > 0 && (
+                {costo > 0 && (
                   <View className="space-y-2">
                     <View className="flex-row justify-between items-center text-sm border-t border-gray-200 pt-2">
                       <Text className="text-gray-600">Tarjeta de crédito</Text>
@@ -107,11 +127,59 @@ export default function ConfirmacionB() {
               <TouchableOpacity
                 className="w-full bg-green-500 hover:bg-green-600 transition-colors duration-200 py-3 rounded-lg mt-4"
                 onPress={async () => {
-                  // Mostrar mensaje de éxito
-                  await alert('Pago confirmado con éxito! Los asientos han sido reservados.');
-                  
-                  // Navegar al grupo de tabs y luego a la pantalla de Home
-                  navigation.navigate('/(tabs)/Home');
+                  try {
+                    // Si hay IDs de asientos, usarlos directamente
+                    let asientosParaActualizar = [];
+                    if (asientosIDs) {
+                      asientosParaActualizar = JSON.parse(asientosIDs);
+                    } else {
+                      // Si no hay IDs, obtenerlos usando los datos de los asientos seleccionados
+                      const asientosSeleccionadosArray = JSON.parse(asientosSeleccionados);
+                      const { data: asientosData, error: fetchError } = await supabase
+                        .from('Asientos')
+                        .select('idAsiento')
+                        .in('Fila', asientosSeleccionadosArray.map(asiento => asiento.Fila))
+                        .in('Columna', asientosSeleccionadosArray.map(asiento => asiento.Columna))
+                        .eq('idEvento', idEvento);
+
+                      if (fetchError) {
+                        throw new Error('Error al obtener los IDs de los asientos: ' + fetchError.message);
+                      }
+                      if (!asientosData || asientosData.length === 0) {
+                        throw new Error('No se encontraron los asientos seleccionados');
+                      }
+                      asientosParaActualizar = asientosData.map(asiento => asiento.idAsiento);
+                    }
+
+                    // Actualizar los asientos a ocupados usando Fila y Columna
+                    const asientosSeleccionadosArray = JSON.parse(asientosSeleccionados);
+                    console.log('Actualizando asientos:', {
+                      asientos: asientosSeleccionadosArray,
+                      idEvento,
+                      filas: asientosSeleccionadosArray.map(asiento => asiento.Fila),
+                      columnas: asientosSeleccionadosArray.map(asiento => asiento.Columna)
+                    });
+                    
+                    const { error: updateError } = await supabase
+                      .from('Asientos')
+                      .update({ Estado: 'Ocupado' })
+                      .in('Fila', asientosSeleccionadosArray.map(asiento => asiento.Fila))
+                      .in('Columna', asientosSeleccionadosArray.map(asiento => asiento.Columna))
+                      .eq('idEvento', idEvento);
+
+                    if (updateError) {
+                      throw new Error('Error al actualizar los asientos: ' + updateError.message);
+                    }
+
+                    // Mostrar mensaje de éxito
+                    await alert('Pago confirmado con éxito! Los asientos han sido reservados.');
+                    
+                    // Navegar al grupo de tabs y luego a la pantalla de Home
+                    navigation.navigate('/(tabs)/Home');
+                  } catch (error) {
+                    console.error('Error al confirmar la reserva:', error);
+                    await alert('Error al confirmar la reserva. Por favor, inténtelo de nuevo.');
+                  }
                 }}
               >
                 <Text className="text-white font-medium text-center text-sm">Confirmar Reserva</Text>

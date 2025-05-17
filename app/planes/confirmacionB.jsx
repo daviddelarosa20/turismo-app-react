@@ -1,6 +1,7 @@
 import { Text, View, Image, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useLayoutEffect } from 'react';
+import { Alert } from 'react-native';
 import { supabase } from '../../supabase/supabase';
 
 export default function ConfirmacionB() {
@@ -176,15 +177,22 @@ export default function ConfirmacionB() {
                       asientosParaActualizar = asientosData.map(asiento => asiento.idAsiento);
                     }
 
-                    // Actualizar los asientos a ocupados usando Fila y Columna
+
+                    const { data: boletajeData, error: boletajeError } = await supabase
+                      .from('Boletaje')
+                      .insert([{
+                        idEvento: idEvento,
+                        AsientosCantidad: parseInt(cantidadAsientos),
+                        AsientosSeleccionados: JSON.stringify(JSON.parse(asientosSeleccionados)),
+                        Costo: parseFloat(costo)
+                      }]);
+
+                    if (boletajeError) {
+                      throw new Error('Error al guardar el boletaje: ' + boletajeError.message);
+                    }
+
+                    // Actualizar los asientos a estado 'Ocupado'
                     const asientosSeleccionadosArray = JSON.parse(asientosSeleccionados);
-                    console.log('Actualizando asientos:', {
-                      asientos: asientosSeleccionadosArray,
-                      idEvento,
-                      filas: asientosSeleccionadosArray.map(asiento => asiento.Fila),
-                      columnas: asientosSeleccionadosArray.map(asiento => asiento.Columna)
-                    });
-                    
                     const { error: updateError } = await supabase
                       .from('Asientos')
                       .update({ Estado: 'Ocupado' })
@@ -196,10 +204,8 @@ export default function ConfirmacionB() {
                       throw new Error('Error al actualizar los asientos: ' + updateError.message);
                     }
 
-                    // Mostrar mensaje de éxito
-                    await alert('Pago confirmado con éxito! Los asientos han sido comprados.');
-                    
-                    // Navegar a la pantalla Home dentro del grupo de tabs
+                    // Mostrar mensaje de éxito y navegar
+                    await Alert.alert('Compra exitosa', '¡Pago confirmado con éxito! Los asientos han sido comprados.');
                     navigation.navigate('(tabs)', { screen: 'Home' });
                   } catch (error) {
                     console.error('Error al confirmar la compra:', error);

@@ -1,32 +1,49 @@
-import { Text, View, Image, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { supabase } from '../../supabase/supabase';
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { supabase } from "../../supabase/supabase";
 
 export default function Pago() {
-  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos, idEvento: eventoId } = useLocalSearchParams();
+  const {
+    Title,
+    Description,
+    Imagen,
+    Fecha,
+    Hora,
+    asientosSeleccionados,
+    cantidadAsientos,
+    idEvento: eventoId,
+  } = useLocalSearchParams();
   const navigation = useNavigation();
-  const [numeroTarjeta, setNumeroTarjeta] = useState('');
-  const [fechaVencimiento, setFechaVencimiento] = useState('');
-  const [cvv, setCvv] = useState('');
+  const [numeroTarjeta, setNumeroTarjeta] = useState("");
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
+  const [cvv, setCvv] = useState("");
   const [costo, setCosto] = useState(0);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Pago',
+      title: "Pago",
       headerStyle: {
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
       },
-      headerTintColor: '#000',
+      headerTintColor: "#000",
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
         fontSize: 18,
-        textAlign: 'center',
+        textAlign: "center",
       },
     });
   }, [navigation]);
 
-// Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
+  // Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
   // React.useEffect(() => {
   //   if (costo === 0) {
   //     navigation.navigate('planes/confirmacionB', {
@@ -49,30 +66,30 @@ export default function Pago() {
   useEffect(() => {
     const obtenerCostoEvento = async () => {
       try {
-        console.log('Buscando costo para evento:', Title);
+        console.log("Buscando costo para evento:", Title);
         const { data: evento, error: eventoError } = await supabase
-          .from('Eventos')
-          .select('Costo')
-          .eq('Titulo', Title)
+          .from("Eventos")
+          .select("Costo")
+          .eq("Titulo", Title)
           .single();
 
         if (eventoError) {
-          console.error('Error al obtener el costo:', eventoError);
+          console.error("Error al obtener el costo:", eventoError);
           return;
         }
 
         if (!evento) {
-          console.error('Evento no encontrado:', Title);
+          console.error("Evento no encontrado:", Title);
           return;
         }
 
-        console.log('Costo base encontrado:', evento.Costo);
-        console.log('Cantidad de asientos:', cantidadAsientos);
+        console.log("Costo base encontrado:", evento.Costo);
+        console.log("Cantidad de asientos:", cantidadAsientos);
 
         // Calcular el costo total (costo por asiento * cantidad de asientos)
         const costoTotal = evento.Costo * (cantidadAsientos || 1);
-        console.log('Costo total calculado:', costoTotal);
-        
+        console.log("Costo total calculado:", costoTotal);
+
         // Guardar el costo y el idEvento
         setCosto(costoTotal);
         setEventoId(evento.idEvento);
@@ -80,7 +97,7 @@ export default function Pago() {
         // Si el costo es 0, redirigir inmediatamente a confirmacionB
         if (costoTotal === 0) {
           // Navegar a confirmacionB con el idEvento
-          navigation.navigate('planes/confirmacionB', {
+          navigation.navigate("planes/confirmacionB", {
             Title,
             Description,
             Imagen,
@@ -88,18 +105,18 @@ export default function Pago() {
             Hora,
             cantidadAsientos,
             costo: 0,
-            numeroTarjeta: 'GRATIS',
-            fechaVencimiento: 'N/A',
-            cvv: 'N/A',
+            numeroTarjeta: "GRATIS",
+            fechaVencimiento: "N/A",
+            cvv: "N/A",
             asientosSeleccionados,
-            idEvento: evento.idEvento
+            idEvento: evento.idEvento,
           });
           return;
         }
         const eventoId = eventoData.idEvento;
         setEventoId(eventoId);
       } catch (error) {
-        console.error('Error al obtener el costo:', error);
+        console.error("Error al obtener el costo:", error);
       }
     };
 
@@ -110,7 +127,9 @@ export default function Pago() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ alignItems: "center", paddingBottom: 40 }}
+      >
         <View className="w-full p-4">
           <View className="bg-white rounded-lg shadow-md p-3">
             <View className="flex-row">
@@ -122,13 +141,22 @@ export default function Pago() {
               <View className="flex-1 ml-4 justify-between">
                 <View>
                   <Text className="text-lg font-bold mb-1">{Title}</Text>
-                  <Text className="text-gray-600 text-sm mb-2" numberOfLines={2}>
+                  <Text
+                    className="text-gray-600 text-sm mb-2"
+                    numberOfLines={2}
+                  >
                     {Description}
                   </Text>
                 </View>
                 <View>
-                  <Text className="text-gray-600 text-sm font-semibold"> {Fecha}</Text>
-                  <Text className="text-gray-600 text-sm font-semibold"> {Hora}</Text>
+                  <Text className="text-gray-600 text-sm font-semibold">
+                    {" "}
+                    {Fecha}
+                  </Text>
+                  <Text className="text-gray-600 text-sm font-semibold">
+                    {" "}
+                    {Hora}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -136,8 +164,10 @@ export default function Pago() {
 
           {/* Formulario de pago */}
           <View className="w-full mt-8">
-            <Text className="text-lg font-bold mb-4 text-center">Ingrese tarjeta de Débito/Crédito para pagar</Text>
-            
+            <Text className="text-lg font-bold mb-4 text-center">
+              Ingrese tarjeta de Débito/Crédito para pagar
+            </Text>
+
             {/* Número de tarjeta */}
             <View className="mb-4">
               <TextInput
@@ -156,7 +186,7 @@ export default function Pago() {
                 placeholder="Fecha de vencimiento (MM/YY)"
                 value={fechaVencimiento}
                 onChangeText={setFechaVencimiento}
-                keyboardType="numeric"
+                keyboardType="text"
                 maxLength={5}
                 className="border border-gray-300 rounded-lg p-3 w-full"
               />
@@ -176,7 +206,9 @@ export default function Pago() {
 
             {/* Botón de pago */}
             <View className="mb-8">
-              <Text className="text-lg font-bold mb-2">Costo Final: ${costo.toFixed(2)}</Text>
+              <Text className="text-lg font-bold mb-2">
+                Costo Final: ${costo.toFixed(2)}
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -185,36 +217,44 @@ export default function Pago() {
                 try {
                   // Validar que todos los campos estén completos
                   if (!numeroTarjeta || numeroTarjeta.length !== 16) {
-                    alert('Por favor ingrese un número de tarjeta válido (16 dígitos)');
+                    alert(
+                      "Por favor ingrese un número de tarjeta válido (16 dígitos)",
+                    );
                     return;
                   }
 
                   if (!fechaVencimiento || fechaVencimiento.length !== 5) {
-                    alert('Por favor ingrese una fecha de vencimiento válida (MM/YY)');
+                    alert(
+                      "Por favor ingrese una fecha de vencimiento válida (MM/YY)",
+                    );
                     return;
                   }
 
                   if (!cvv || cvv.length !== 3) {
-                    alert('Por favor ingrese un CVV válido (3 dígitos)');
+                    alert("Por favor ingrese un CVV válido (3 dígitos)");
                     return;
                   }
 
                   // Navegar a la página de confirmación con los datos
-                  const asientosIDs = await Promise.all(JSON.parse(asientosSeleccionados).map(async (asiento) => {
-                    const { data: asientoData, error: asientoError } = await supabase
-                      .from('Asientos')
-                      .select('idAsiento')
-                      .eq('idEvento', parseInt(eventoId)) // Convertir a número
-                      .eq('Fila', asiento.Fila)
-                      .eq('Columna', asiento.Columna)
-                      .single();
+                  const asientosIDs = await Promise.all(
+                    JSON.parse(asientosSeleccionados).map(async (asiento) => {
+                      const { data: asientoData, error: asientoError } =
+                        await supabase
+                          .from("Asientos")
+                          .select("idAsiento")
+                          .eq("idEvento", parseInt(eventoId)) // Convertir a número
+                          .eq("Fila", asiento.Fila)
+                          .eq("Columna", asiento.Columna)
+                          .single();
 
-                    if (asientoError) throw asientoError;
-                    if (!asientoData) throw new Error('Asiento no encontrado');
-                    return asientoData.idAsiento;
-                  }));
+                      if (asientoError) throw asientoError;
+                      if (!asientoData)
+                        throw new Error("Asiento no encontrado");
+                      return asientoData.idAsiento;
+                    }),
+                  );
 
-                  navigation.navigate('planes/confirmacionB', {
+                  navigation.navigate("planes/confirmacionB", {
                     Title,
                     Description,
                     Imagen,
@@ -227,11 +267,13 @@ export default function Pago() {
                     cvv: cvv.slice(-2), // Solo mostrar los últimos 2 dígitos del CVV
                     asientosSeleccionados: asientosSeleccionados, // Ya viene como string de Asientos.jsx
                     asientosIDs: JSON.stringify(asientosIDs),
-                    idEvento: eventoId // Usar el eventoId guardado en el estado
+                    idEvento: eventoId, // Usar el eventoId guardado en el estado
                   });
                 } catch (error) {
-                  console.error('Error al procesar el pago:', error);
-                  alert('Error al procesar el pago. Por favor, inténtelo de nuevo.');
+                  console.error("Error al procesar el pago:", error);
+                  alert(
+                    "Error al procesar el pago. Por favor, inténtelo de nuevo.",
+                  );
                 }
               }}
             >

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import {
   View,
@@ -66,8 +65,7 @@ export default function SettingsScreen() {
               icon="robot-outline"
               text="Chat-Bot"
               onPress={() => {
-                console.log("Navegar a Chat-Bot");
-                navigateTo("/chat-bot");
+                router.push("/help/helpcenter");
               }}
             />
             <View className="border-b border-[#3a3f44] my-2" />
@@ -101,6 +99,5 @@ export default function SettingsScreen() {
         </ScrollView>
       </View>
     </SafeAreaView>
-
   );
 }

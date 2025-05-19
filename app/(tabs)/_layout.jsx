@@ -1,15 +1,11 @@
 import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { View, Platform } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { TouchableOpacity } from "react-native";
+import { Platform } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { View, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
-export default function Layout() {
-  const router = useRouter();
-
+const router = useRouter();
 
 const Colors = {
   darkBlue: "#292d32",
@@ -40,15 +36,16 @@ export default () => {
           ),
           headerRight: () => (
             <View className="items-center justify-center mr-3 rounded-full bg-mediumBlue p-2">
-              <TouchableOpacity  onPress={() => {
+              <TouchableOpacity
+                onPress={() => {
                   router.push("/extras/Perfil");
-                }}>
+                }}
+              >
                 <AntDesign
                   name="user"
                   size={24}
                   color={Colors.veryLightBeige}
                 />
-
               </TouchableOpacity>
             </View>
           ),
@@ -75,33 +72,26 @@ export default () => {
         <Tabs.Screen
           name="Home"
           options={{
-
             title: "Home",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="home" size={size} color={color} />
             ),
             headerTitle: "Inicio",
-
-        
-
           }}
         />
         <Tabs.Screen
           name="Search"
           options={{
-
             title: "Search",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="search1" size={size} color={color} />
             ),
             headerTitle: "Search",
-
           }}
         />
         <Tabs.Screen
           name="Settings"
           options={{
-
             title: "Settings",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="setting" size={size} color={color} />
@@ -113,10 +103,9 @@ export default () => {
             },
             headerStyle: { backgroundColor: Colors.darkBlue },
             headerTintColor: Colors.veryLightBeige,
-
           }}
         />
       </Tabs>
     </>
   );
-}
+};

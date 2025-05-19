@@ -77,7 +77,11 @@ export default function Home() {
             >
               Categorías
             </Text>
-            <TouchableOpacity onPress={() => router.push("/categorias")}>
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/extras/Categorias");
+              }}
+            >
               <Text
                 style={{ color: Colors.lightBeige }}
                 className="font-semibold text-base"

@@ -91,8 +91,8 @@ export default function PlanBoletaje() {
                   router.push({
                     pathname: "/planes/Evento",
                     params: {
-                      title: title
-                    }
+                      title: title,
+                    },
                   });
                 }}
               >

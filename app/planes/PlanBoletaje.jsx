@@ -20,6 +20,7 @@ import { useRouter } from "expo-router";
 export default function PlanBoletaje() {
   const navigation = useNavigation();
   const router = useRouter();
+  const { title, description, direccion, imageUrl } = useLocalSearchParams();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -36,7 +37,7 @@ export default function PlanBoletaje() {
     });
   }, [navigation]);
 
-  const { title, description, direccion, imageUrl } = useLocalSearchParams();
+  // const { title, description, direccion, imageUrl } = useLocalSearchParams();
 
   const [valoracion, setValoracion] = useState(null);
   const [empresa, setEmpresa] = useState(null);
@@ -154,7 +155,12 @@ export default function PlanBoletaje() {
               <TouchableOpacity
                 className="mt-20 bg-green-200 px-8 py-3 rounded-full"
                 onPress={() => {
-                  router.push("/planes/Evento");
+                  router.push({
+                    pathname: "/planes/Evento",
+                    params: {
+                      title: title,
+                    },
+                  });
                 }}
               >
                 <Text className="font-semibold text-black">

@@ -4,38 +4,34 @@ import Feather from "@expo/vector-icons/Feather";
 import { View, TouchableOpacity } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
-export default function TabsLayout() {
+export default function Layout() {
   const router = useRouter();
 
   return (
     <>
       <StatusBar style="auto" />
       <Tabs
-        screenOptions={({ route }) => {
-          const isTab = ["Home", "Search", "Settings"].includes(route.name);
-          return {
-            headerShown: isTab,
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#e1dcd0" },
-            headerLeft: isTab
-              ? () => (
-                  <View className="ml-3">
-                    <TouchableOpacity onPress={() => alert("Menu")}>
-                      <Feather name="menu" size={24} color="black" />
-                    </TouchableOpacity>
-                  </View>
-                )
-              : undefined,
-            headerRight: isTab
-              ? () => (
-                  <View className="mr-3 rounded-full bg-slate-100 p-2">
-                    <TouchableOpacity onPress={() => router.push("/extras/Perfil")}>
-                      <AntDesign name="user" size={24} color="black" />
-                    </TouchableOpacity>
-                  </View>
-                )
-              : undefined,
-          };
+        screenOptions={{
+          headerTitleAlign: "center",
+          headerStyle: { backgroundColor: "#e1dcd0" },
+          headerLeft: () => (
+            <View className="items-center justify-center ml-3">
+              <TouchableOpacity onPress={() => alert("Menu")}>
+                <Feather name="menu" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          ),
+          headerRight: () => (
+            <View className="items-center justify-center mr-3 rounded-full bg-slate-100 p-2">
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/extras/Perfil");
+                }}
+              >
+                <AntDesign name="user" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       >
         <Tabs.Screen
@@ -63,18 +59,6 @@ export default function TabsLayout() {
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="setting" size={size} color={color} />
             ),
-          }}
-        />
-
-        <Tabs.Screen
-          name="extras/Perfil"             
-          options={{
-            tabBarButton: () => null,
-            headerShown: true,
-            headerTitle: "Editar perfil",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#e1dcd0" },
-            headerTintColor: "black",
           }}
         />
       </Tabs>

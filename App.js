@@ -5,9 +5,6 @@ export default function App() {
   return (
     <View>
       <StatusBar style="auto" />
-      <ScrollView>
-        <Text>hola</Text>
-      </ScrollView>
     </View>
   );
 }

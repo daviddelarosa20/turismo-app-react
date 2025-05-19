@@ -1,15 +1,30 @@
 import { Text, View, Image, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { supabase } from '../../supabase/supabase';
 
 export default function Pago() {
-  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos } = useLocalSearchParams();
+  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos, idEvento: eventoId } = useLocalSearchParams();
   const navigation = useNavigation();
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [cvv, setCvv] = useState('');
   const [costo, setCosto] = useState(0);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Pago',
+      headerStyle: {
+        backgroundColor: '#fff',
+      },
+      headerTintColor: '#000',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        textAlign: 'center',
+      },
+    });
+  }, [navigation]);
 
 // Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
   // React.useEffect(() => {
@@ -58,13 +73,31 @@ export default function Pago() {
         const costoTotal = evento.Costo * (cantidadAsientos || 1);
         console.log('Costo total calculado:', costoTotal);
         
+        // Guardar el costo y el idEvento
+        setCosto(costoTotal);
+        setEventoId(evento.idEvento);
+
         // Si el costo es 0, redirigir inmediatamente a confirmacionB
         if (costoTotal === 0) {
-          setCosto(0);
+          // Navegar a confirmacionB con el idEvento
+          navigation.navigate('planes/confirmacionB', {
+            Title,
+            Description,
+            Imagen,
+            Fecha,
+            Hora,
+            cantidadAsientos,
+            costo: 0,
+            numeroTarjeta: 'GRATIS',
+            fechaVencimiento: 'N/A',
+            cvv: 'N/A',
+            asientosSeleccionados,
+            idEvento: evento.idEvento
+          });
           return;
         }
-
-        setCosto(costoTotal);
+        const eventoId = eventoData.idEvento;
+        setEventoId(eventoId);
       } catch (error) {
         console.error('Error al obtener el costo:', error);
       }
@@ -167,18 +200,34 @@ export default function Pago() {
                   }
 
                   // Navegar a la página de confirmación con los datos
+                  const asientosIDs = await Promise.all(JSON.parse(asientosSeleccionados).map(async (asiento) => {
+                    const { data: asientoData, error: asientoError } = await supabase
+                      .from('Asientos')
+                      .select('idAsiento')
+                      .eq('idEvento', parseInt(eventoId)) // Convertir a número
+                      .eq('Fila', asiento.Fila)
+                      .eq('Columna', asiento.Columna)
+                      .single();
+
+                    if (asientoError) throw asientoError;
+                    if (!asientoData) throw new Error('Asiento no encontrado');
+                    return asientoData.idAsiento;
+                  }));
+
                   navigation.navigate('planes/confirmacionB', {
                     Title,
                     Description,
                     Imagen,
                     Fecha,
                     Hora,
-                    cantidadAsientos: asientosSeleccionados ? asientosSeleccionados.length : 0,
+                    cantidadAsientos,
                     costo,
                     numeroTarjeta: numeroTarjeta.slice(-4), // Solo mostrar los últimos 4 dígitos
                     fechaVencimiento,
                     cvv: cvv.slice(-2), // Solo mostrar los últimos 2 dígitos del CVV
-                    asientosSeleccionados: asientosSeleccionados // Ya viene como string de Asientos.jsx
+                    asientosSeleccionados: asientosSeleccionados, // Ya viene como string de Asientos.jsx
+                    asientosIDs: JSON.stringify(asientosIDs),
+                    idEvento: eventoId // Usar el eventoId guardado en el estado
                   });
                 } catch (error) {
                   console.error('Error al procesar el pago:', error);

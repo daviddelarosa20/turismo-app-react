@@ -1,11 +1,9 @@
-// En Home.js
-
 import { Text, View, ScrollView, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Card from "../../components/Card";
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
 
 const Colors = {
   darkBlue: "#1a1e22",

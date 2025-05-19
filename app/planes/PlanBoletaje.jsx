@@ -37,8 +37,6 @@ export default function PlanBoletaje() {
     });
   }, [navigation]);
 
-  // const { title, description, direccion, imageUrl } = useLocalSearchParams();
-
   const [valoracion, setValoracion] = useState(null);
   const [empresa, setEmpresa] = useState(null);
 

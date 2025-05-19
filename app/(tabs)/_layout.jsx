@@ -2,7 +2,7 @@ import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Platform } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Platform } from "react-native"; // Removed duplicate TouchableOpacity
 import { StatusBar } from "expo-status-bar";
 
 const router = useRouter();
@@ -14,7 +14,10 @@ const Colors = {
   veryLightBeige: "#F5EFE7",
 };
 
-export default () => {
+export default function Layout() {
+  // This is your single default export
+  const router = useRouter();
+
   return (
     <>
       <StatusBar style="light" />
@@ -108,4 +111,4 @@ export default () => {
       </Tabs>
     </>
   );
-};
+}

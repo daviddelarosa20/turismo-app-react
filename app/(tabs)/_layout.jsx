@@ -1,11 +1,12 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { View } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { TouchableOpacity } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
+import { View, TouchableOpacity } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
-export default () => {
+export default function Layout() {
+  const router = useRouter();
+
   return (
     <>
       <StatusBar style="auto" />
@@ -22,7 +23,11 @@ export default () => {
           ),
           headerRight: () => (
             <View className="items-center justify-center mr-3 rounded-full bg-slate-100 p-2">
-              <TouchableOpacity onPress={() => alert("Perfil")}>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/extras/Perfil");
+                }}
+              >
                 <AntDesign name="user" size={24} color="black" />
               </TouchableOpacity>
             </View>
@@ -32,31 +37,31 @@ export default () => {
         <Tabs.Screen
           name="Home"
           options={{
+            title: "Inicio",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="home" size={size} color={color} />
             ),
-            title: "Inicio",
           }}
         />
         <Tabs.Screen
           name="Search"
           options={{
+            title: "Buscar",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="search1" size={size} color={color} />
             ),
-            title: "Buscar",
           }}
         />
         <Tabs.Screen
           name="Settings"
           options={{
+            title: "Configuración",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="setting" size={size} color={color} />
             ),
-            title: "Configuración",
           }}
         />
       </Tabs>
     </>
   );
-};
+}

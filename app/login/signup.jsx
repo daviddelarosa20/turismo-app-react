@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,16 +9,29 @@ import {
   Dimensions,
   Platform,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { supabase } from "../../supabase/supabase";
 
 const { width } = Dimensions.get("window");
 
 export default function SignUpScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [apodo, setApodo] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (navigation && navigation.setOptions) {
@@ -27,6 +40,51 @@ export default function SignUpScreen() {
       });
     }
   }, [navigation]);
+
+  const handleSignUp = async () => {
+    setLoading(true);
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Las contraseñas no coinciden.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("Usuarios").insert([
+        {
+          Nombre: nombre,
+          Apellido: apellido,
+          Email: email,
+          Telefono: telefono,
+          Apodo: apodo,
+          Password: password,
+          FechaRegistro: new Date().toISOString(),
+        },
+      ]);
+
+      if (error) {
+        throw error;
+      }
+
+      Alert.alert(
+        "Éxito",
+        "Usuario registrado exitosamente en la base de datos!",
+      );
+      router.push("/login/login");
+    } catch (error) {
+      console.error(
+        "Error al registrar el usuario en la base de datos:",
+        error.message,
+      );
+      Alert.alert(
+        "Error",
+        "Hubo un problema al registrar el usuario: " + error.message,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#1a1e22]">
@@ -58,7 +116,7 @@ export default function SignUpScreen() {
             {/* Campo Nombre */}
             <View className="flex-row items-center bg-[#2a2e33] p-4 rounded-xl mb-4">
               <Icon
-                name="account-outline" // Puedes cambiar este icono si prefieres otro
+                name="account-outline"
                 size={20}
                 color="#9ca3af"
                 className="mr-3"
@@ -67,13 +125,16 @@ export default function SignUpScreen() {
                 placeholder="Nombre"
                 placeholderTextColor="#9ca3af"
                 className="flex-1 text-white text-base ml-2"
+                value={nombre}
+                onChangeText={setNombre}
+                autoCapitalize="words"
               />
             </View>
 
             {/* Campo Apellido */}
             <View className="flex-row items-center bg-[#2a2e33] p-4 rounded-xl mb-4">
               <Icon
-                name="account-outline" // Puedes cambiar este icono si prefieres otro
+                name="account-outline"
                 size={20}
                 color="#9ca3af"
                 className="mr-3"
@@ -82,6 +143,9 @@ export default function SignUpScreen() {
                 placeholder="Apellido"
                 placeholderTextColor="#9ca3af"
                 className="flex-1 text-white text-base ml-2"
+                value={apellido}
+                onChangeText={setApellido}
+                autoCapitalize="words"
               />
             </View>
 
@@ -97,14 +161,17 @@ export default function SignUpScreen() {
                 placeholder="Correo electrónico"
                 placeholderTextColor="#9ca3af"
                 keyboardType="email-address"
+                autoCapitalize="none"
                 className="flex-1 text-white text-base ml-2"
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
             {/* Campo Teléfono */}
             <View className="flex-row items-center bg-[#2a2e33] p-4 rounded-xl mb-4">
               <Icon
-                name="phone-outline" // Icono de teléfono
+                name="phone-outline"
                 size={20}
                 color="#9ca3af"
                 className="mr-3"
@@ -114,13 +181,15 @@ export default function SignUpScreen() {
                 placeholderTextColor="#9ca3af"
                 keyboardType="phone-pad"
                 className="flex-1 text-white text-base ml-2"
+                value={telefono}
+                onChangeText={setTelefono}
               />
             </View>
 
             {/* Campo Apodo */}
             <View className="flex-row items-center bg-[#2a2e33] p-4 rounded-xl mb-4">
               <Icon
-                name="account-cowboy-hat-outline" // Un icono divertido para apodo, puedes cambiarlo
+                name="account-cowboy-hat-outline"
                 size={20}
                 color="#9ca3af"
                 className="mr-3"
@@ -129,6 +198,9 @@ export default function SignUpScreen() {
                 placeholder="Apodo"
                 placeholderTextColor="#9ca3af"
                 className="flex-1 text-white text-base ml-2"
+                value={apodo}
+                onChangeText={setApodo}
+                autoCapitalize="none"
               />
             </View>
 
@@ -143,11 +215,20 @@ export default function SignUpScreen() {
               <TextInput
                 placeholder="Contraseña"
                 placeholderTextColor="#9ca3af"
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 className="flex-1 text-white text-base ml-2"
+                value={password}
+                onChangeText={setPassword}
               />
-              <TouchableOpacity className="ml-3">
-                <Icon name="eye-outline" size={20} color="#9ca3af" />
+              <TouchableOpacity
+                className="ml-3"
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Icon
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#9ca3af"
+                />
               </TouchableOpacity>
             </View>
 
@@ -162,20 +243,43 @@ export default function SignUpScreen() {
               <TextInput
                 placeholder="Confirmar contraseña"
                 placeholderTextColor="#9ca3af"
-                secureTextEntry
+                secureTextEntry={!showConfirmPassword}
                 className="flex-1 text-white text-base ml-2"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
               />
-              <TouchableOpacity className="ml-3">
-                <Icon name="eye-outline" size={20} color="#9ca3af" />
+              <TouchableOpacity
+                className="ml-3"
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Icon
+                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#9ca3af"
+                />
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Botones de acción (Sign up, Google) */}
+          {/* Botones de acción (Sign up) */}
           <View className="w-full items-center">
             {/* Botón Sign up */}
-            <TouchableOpacity className="w-full bg-white py-4 rounded-full items-center mb-4">
-              <Text className="text-black font-bold text-lg">Registrarse</Text>
+            <TouchableOpacity
+              className={`w-full ${
+                loading ? "bg-gray-400" : "bg-white"
+              } py-4 rounded-full items-center mb-4`}
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              {loading ? (
+                <Text className="text-black font-bold text-lg">
+                  Registrando...
+                </Text>
+              ) : (
+                <Text className="text-black font-bold text-lg">
+                  Registrarse
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -184,13 +288,8 @@ export default function SignUpScreen() {
             <Text className="text-white text-base">
               ¿Ya tienes una cuenta?{" "}
             </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Login")} // Navegar de vuelta a la pantalla de Login
-            >
-              <Text
-                className="text-white font-bold text-base"
-                onPress={() => router.push("/login/login")}
-              >
+            <TouchableOpacity onPress={() => router.push("/login/login")}>
+              <Text className="text-white font-bold text-base">
                 Iniciar sesión
               </Text>
             </TouchableOpacity>

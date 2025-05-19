@@ -1,9 +1,18 @@
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
+// En Home.js
+
+import { Text, View, ScrollView, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Card from "../../components/Card";
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
+
+const Colors = {
+  darkBlue: "#1a1e22",
+  mediumBlue: "#282d33",
+  lightBeige: "#D8C4B6",
+  veryLightBeige: "#F5EFE7",
+};
 
 export default function Home() {
   const imagenesEmpresas = {
@@ -14,14 +23,16 @@ export default function Home() {
     "Teatro Ricardo Castro":
       "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Teatro.jpg",
   };
+
   const [categorias, setCategorias] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const router = useRouter();
+
   const getCategorias = async () => {
     let { data: Categorias, error } = await supabase
       .from("Categorias")
       .select("Nombre")
-      .limit(3)
+      .limit(5)
       .order("Nombre", { ascending: true });
     if (error) {
       console.log(error);
@@ -29,16 +40,17 @@ export default function Home() {
       setCategorias(Categorias);
     }
   };
+
   const getEmpresas = async () => {
     let { data: Empresas, error } = await supabase.from("Empresas").select(`
-    Nombre,
-    Descripcion,
-    Portada,
-    RutaDestino,
-    Calle,
-    NumExt,
-    Colonia,
-    CodigoPost
+      Nombre,
+      Descripcion,
+      Portada,
+      RutaDestino,
+      Calle,
+      NumExt,
+      Colonia,
+      CodigoPost
     `);
     if (error) {
       console.log(error);
@@ -46,39 +58,73 @@ export default function Home() {
       setEmpresas(Empresas);
     }
   };
-  useEffect(() => {
-    getCategorias();
-  }, []);
 
   useEffect(() => {
+    getCategorias();
     getEmpresas();
   }, []);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView
+      style={{ backgroundColor: Colors.darkBlue }}
+      className="flex-1"
+    >
       <ScrollView className="flex-1">
-        <View className="flex-1 items-center justify-center mb-12">
-          <View className="bg-slate-100 w-full border border-blue-400  p-4">
-            <Text className="text-2xl font-bold mb-2">
-              Categorías Populares
+        <View className="px-4 pt-2">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text
+              style={{ color: Colors.veryLightBeige }}
+              className="text-2xl font-bold"
+            >
+              Categorías
             </Text>
-            <View className="items-center justify-center flex-row overflow-x-auto">
-              {categorias.map((categoria, index) => (
+            <TouchableOpacity onPress={() => router.push("/categorias")}>
+              <Text
+                style={{ color: Colors.lightBeige }}
+                className="font-semibold text-base"
+              >
+                Ver más &gt;
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-8"
+            contentContainerStyle={{ paddingRight: 16 }}
+          >
+            {categorias.length > 0 ? (
+              categorias.map((categoria, index) => (
                 <TouchableOpacity
-                  className="bg-stone-400 w-30 h-15 rounded-xl items-center justify-center ml-2 mb-2 p-3"
+                  style={{ backgroundColor: Colors.mediumBlue }}
+                  className="rounded-xl px-4 py-2 mr-2"
                   key={index}
                   onPress={() =>
                     alert("Estas viendo la categoria " + categoria.Nombre)
                   }
                 >
-                  <Text className="text-white">{categoria.Nombre}</Text>
+                  <Text
+                    style={{ color: Colors.veryLightBeige }}
+                    className="font-semibold"
+                  >
+                    {categoria.Nombre}
+                  </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <Text className="text-2xl font-bold mb-2 mt-2">
+              ))
+            ) : (
+              <Text style={{ color: Colors.lightBeige }}>
+                Cargando categorías...
+              </Text>
+            )}
+          </ScrollView>
+
+          <Text
+            style={{ color: Colors.veryLightBeige }}
+            className="text-2xl font-bold mb-4"
+          >
             Nuestra recomendación
           </Text>
-          {/* Ejemplo de Card con datos de destino turístico */}
           <View className="items-center justify-center w-full">
             {empresas.length > 0 ? (
               empresas.map((empresa, index) => (
@@ -108,7 +154,9 @@ export default function Home() {
                 />
               ))
             ) : (
-              <Text className="text-gray-500">Cargando recomendaciones...</Text>
+              <Text style={{ color: Colors.lightBeige }} className="mt-4">
+                Cargando recomendaciones...
+              </Text>
             )}
           </View>
         </View>

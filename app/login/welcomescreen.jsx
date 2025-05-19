@@ -35,7 +35,7 @@ export default function WelcomeScreen() {
         <View className="flex-1 items-center justify-between px-6 mb-10">
           <View className="items-center w-full ">
             <Image
-              source={require("../../assets/grupo-gente.png")}
+              source={require("../../assets/fondop.png")}
               resizeMode="contain"
               style={{
                 width: "100%",
@@ -49,11 +49,11 @@ export default function WelcomeScreen() {
                 width < 400 ? "text-2xl" : "text-4xl"
               }`}
             >
-              Social Chatter Team.
+              Descubre el mundo con Viator!
             </Text>
             <Text className="text-white text-base text-center leading-6 px-2">
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum
+              Conecta con destinos únicos, experiencias locales y aventuras
+              inolvidables.
             </Text>
           </View>
           <View className="w-full flex-row justify-center mt-10 py-4">
@@ -61,13 +61,17 @@ export default function WelcomeScreen() {
               className="flex-1 py-4 border border-white rounded-full items-center mr-2"
               onPress={() => router.push("/login/login")}
             >
-              <Text className="text-white font-semibold text-lg">Login</Text>
+              <Text className="text-white font-semibold text-lg">
+                Iniciar sesión
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="flex-1 py-4 bg-white rounded-full items-center ml-2"
               onPress={() => router.push("/login/signup")}
             >
-              <Text className="text-black font-semibold text-lg">Sign up</Text>
+              <Text className="text-black font-semibold text-lg">
+                Registrarse
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import Card from "../../components/Card";
 
 const Colors = {
   darkBlue: "#1a1e22",

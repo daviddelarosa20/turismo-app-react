@@ -5,6 +5,13 @@ import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 
+const Colors = {
+  darkBlue: "#1a1e22",
+  mediumBlue: "#282d33",
+  lightBeige: "#D8C4B6",
+  veryLightBeige: "#F5EFE7",
+};
+
 export default function Home() {
   const imagenesEmpresas = {
     "Denta Stick":
@@ -14,6 +21,7 @@ export default function Home() {
     "Teatro Ricardo Castro":
       "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Teatro.jpg",
   };
+
   const [categorias, setCategorias] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const router = useRouter();
@@ -22,7 +30,7 @@ export default function Home() {
     let { data: Categorias, error } = await supabase
       .from("Categorias")
       .select("Nombre")
-      .limit(3)
+      .limit(5)
       .order("Nombre", { ascending: true });
     if (error) {
       console.log(error);
@@ -33,15 +41,15 @@ export default function Home() {
 
   const getEmpresas = async () => {
     let { data: Empresas, error } = await supabase.from("Empresas").select(`
-            Nombre,
-            Descripcion,
-            Portada,
-            RutaDestino,
-            Calle,
-            NumExt,
-            Colonia,
-            CodigoPost
-        `);
+      Nombre,
+      Descripcion,
+      Portada,
+      RutaDestino,
+      Calle,
+      NumExt,
+      Colonia,
+      CodigoPost
+    `);
     if (error) {
       console.log(error);
     } else {
@@ -51,102 +59,102 @@ export default function Home() {
 
   useEffect(() => {
     getCategorias();
-  }, []);
-
-  useEffect(() => {
     getEmpresas();
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      <ScrollView className="flex-1 p-4">
-        {/* Sección de categorías */}
-        <View className="mb-2">
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-lg font-semibold">Categorías</Text>
-            <TouchableOpacity onPress={() => router.push("/Search")}>
-              <Text className="text-blue-500">Ver más {">"}</Text>
+    <SafeAreaView
+      style={{ backgroundColor: Colors.darkBlue }}
+      className="flex-1"
+    >
+      <ScrollView className="flex-1">
+        <View className="px-4 pt-2">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text
+              style={{ color: Colors.veryLightBeige }}
+              className="text-2xl font-bold"
+            >
+              Categorías
+            </Text>
+            <TouchableOpacity onPress={() => router.push("/categorias")}>
+              <Text
+                style={{ color: Colors.lightBeige }}
+                className="font-semibold text-base"
+              >
+                Ver más &gt;
+              </Text>
             </TouchableOpacity>
           </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="pb-4"
+            className="mb-8"
+            contentContainerStyle={{ paddingRight: 16 }}
           >
-            {categorias.map((categoria, index) => (
-              <TouchableOpacity
-                key={index}
-                className="bg-white rounded-lg shadow-md mr-4 p-3 w-32 items-center justify-center"
-                onPress={() =>
-                  alert("Estas viendo la categoria " + categoria.Nombre)
-                }
-              >
-                {/*Imagen de las categorias*/}
-                <View className="bg-gray-200 rounded-full w-16 h-16 mb-2" />
-                <Text className="text-center text-sm pb-2">
-                  {categoria.Nombre}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View>
-          <Text className="text-lg font-semibold mb-2">Explorar</Text>
-          <View className="space-y-4">
-            {empresas.map((empresa, index) => (
-              <View
-                key={index}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <Image
-                  source={{
-                    uri:
-                      imagenesEmpresas[empresa.Nombre] ||
-                      "https://via.placeholder.com/300x150",
-                  }}
-                  className="w-full h-32"
-                />
-                <View className="p-4">
-                  <Text className="text-lg font-semibold mb-1">
-                    {empresa.Nombre}
-                  </Text>
-                  <View className="flex-row items-center mb-1">
-                    {[...Array(4)].map((_, i) => (
-                      <FontAwesome key={i} name="star" size={16} color="gold" />
-                    ))}
-                    <FontAwesome name="star-o" size={16} color="gray" />
-                  </View>
-                  <View className="flex-row items-center mb-2">
-                    <FontAwesome name="map-marker" size={14} color="gray" />
-                    <Text className="text-gray-600 text-sm ml-1">{`${empresa.Calle} ${empresa.NumExt}, ${empresa.Colonia}`}</Text>
-                  </View>
-                  <Text className="text-gray-700 text-sm mb-2 line-clamp-2">
-                    {empresa.Descripcion}
-                  </Text>
-                  <TouchableOpacity
-                    className="bg-blue-500 text-white py-2 px-4 rounded-full w-full items-center justify-center"
-                    onPress={() =>
-                      router.push({
-                        pathname: `/planes/${empresa.RutaDestino}`,
-                        params: {
-                          title: empresa.Nombre,
-                          description: empresa.Descripcion,
-                          direccion: `${empresa.Calle} ${empresa.NumExt}, ${empresa.Colonia}, CP: ${empresa.CodigoPost}`,
-                          imageUrl:
-                            imagenesEmpresas[empresa.Nombre] ||
-                            "https://via.placeholder.com/300x200",
-                        },
-                      })
-                    }
+            {categorias.length > 0 ? (
+              categorias.map((categoria, index) => (
+                <TouchableOpacity
+                  style={{ backgroundColor: Colors.mediumBlue }}
+                  className="rounded-xl px-4 py-2 mr-2"
+                  key={index}
+                  onPress={() =>
+                    alert("Estas viendo la categoria " + categoria.Nombre)
+                  }
+                >
+                  <Text
+                    style={{ color: Colors.veryLightBeige }}
+                    className="font-semibold"
                   >
-                    <Text className="text-white">Ver más</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-            {empresas.length === 0 && (
-              <Text className="text-gray-500">Cargando recomendaciones...</Text>
+                    {categoria.Nombre}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={{ color: Colors.lightBeige }}>
+                Cargando categorías...
+              </Text>
+            )}
+          </ScrollView>
+
+          <Text
+            style={{ color: Colors.veryLightBeige }}
+            className="text-2xl font-bold mb-4"
+          >
+            Nuestra recomendación
+          </Text>
+          <View className="items-center justify-center w-full">
+            {empresas.length > 0 ? (
+              empresas.map((empresa, index) => (
+                <Card
+                  key={index}
+                  imageUrl={
+                    imagenesEmpresas[empresa.Nombre] ||
+                    "https://via.placeholder.com/300x200"
+                  }
+                  title={empresa.Nombre}
+                  description={empresa.Descripcion}
+                  direccion={`${empresa.Calle} ${empresa.NumExt}, ${empresa.Colonia}, CP: ${empresa.CodigoPost}`}
+                  buttonText="Ver más"
+                  onPress={() =>
+                    router.push({
+                      pathname: `/planes/${empresa.RutaDestino}`,
+                      params: {
+                        title: empresa.Nombre,
+                        description: empresa.Descripcion,
+                        direccion: `${empresa.Calle} ${empresa.NumExt}, ${empresa.Colonia}, CP: ${empresa.CodigoPost}`,
+                        imageUrl:
+                          imagenesEmpresas[empresa.Nombre] ||
+                          "https://via.placeholder.com/300x200",
+                      },
+                    })
+                  }
+                />
+              ))
+            ) : (
+              <Text style={{ color: Colors.lightBeige }} className="mt-4">
+                Cargando recomendaciones...
+              </Text>
             )}
           </View>
         </View>

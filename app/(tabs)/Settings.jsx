@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import {
   View,
@@ -100,5 +101,6 @@ export default function SettingsScreen() {
         </ScrollView>
       </View>
     </SafeAreaView>
+
   );
 }

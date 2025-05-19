@@ -15,8 +15,8 @@ const Colors = {
 
 export default function Home() {
   const imagenesEmpresas = {
-    "Denta Stick":
-      "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Dentista.jpg",
+    "La Finca":
+      "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//RestauranteComida.jpg",
     "SweetCake House":
       "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Postres.jpg",
     "Teatro Ricardo Castro":

@@ -4,63 +4,61 @@ import { useLayoutEffect } from "react";
 
 export default function ConfirmarRsv() {
   const navigation = useNavigation();
-  const { nombre, telefono, fecha, hora, personas, empresa } = useLocalSearchParams();
+  const { nombre, telefono, fecha, hora, personas, empresa } =
+    useLocalSearchParams();
   const router = useRouter();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Confirmación",
-      headerStyle: { backgroundColor: "#e1dcd0" },
+      headerStyle: { backgroundColor: "#282d33" },
       headerTitleAlign: "center",
+      headerTintColor: "#F5EFE7",
     });
   }, []);
 
   return (
-    <View style={{ flex: 1, padding: 20, backgroundColor: "white" }}>
-      <Text className="text-right text-gray-500 mb-5">2 de 2</Text>
-      <Text style={{ fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 40 }}>
+    <View className="flex-1 bg-darkBlue-900 p-6 items-center justify-center">
+      <Text className="text-right text-gray-500 mb-5 w-full">2 de 2</Text>
+      <Text className="text-3xl font-bold text-center mb-10 text-veryLightBeige-500">
         ¡Reserva Confirmada!
       </Text>
 
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#f2f2f2",
-          padding: 20,
-          borderRadius: 10,
-          marginBottom: 30,
-        }}
-      >
-        <Text style={{ fontSize: 18, fontWeight: "500", textAlign: "center", marginBottom: 20 }}>
+      <View className="w-full bg-slate-50 p-6 rounded-xl mb-8">
+        <Text className="text-xl font-semibold text-center mb-6 text-veryLightBeige-500">
           Resumen
         </Text>
 
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>📍 Restaurante: {empresa}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>🙍 Nombre: {nombre}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>👥 Personas: {personas}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>📅 Fecha: {fecha}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>⏰ Hora: {hora}</Text>
-        <Text style={{ fontSize: 16, marginBottom: 20 }}>📞 Teléfono: {telefono}</Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">📍 Restaurante:</Text> {empresa}
+        </Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">🙍 Nombre:</Text> {nombre}
+        </Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">👥 Personas:</Text> {personas}
+        </Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">📅 Fecha:</Text> {fecha}
+        </Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">⏰ Hora:</Text> {hora}
+        </Text>
+        <Text className="text-lg text-lightBeige-400 mb-3">
+          <Text className="font-semibold">📞 Teléfono:</Text> {telefono}
+        </Text>
       </View>
 
-      <View style={{ alignItems: "center" }}>
-  <TouchableOpacity
-    style={{
-      width: "40%",
-      backgroundColor: "#bbf7d0", 
-      padding: 12,
-      borderRadius: 9999,
-    }}
-    onPress={() => {
-      router.push("/");
-    }}
-  >
-    <Text style={{ fontWeight: "600", textAlign: "center", color: "black" }}>
-      Regresar al inicio
-    </Text>
-  </TouchableOpacity>
-</View>
-
+      <TouchableOpacity
+        className="w-40 bg-green-300 p-3 rounded-full"
+        onPress={() => {
+          router.push("/Home");
+        }}
+      >
+        <Text className="font-semibold text-center text-darkBlue-900 text-lg">
+          Regresar
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

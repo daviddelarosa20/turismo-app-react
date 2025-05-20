@@ -63,7 +63,7 @@ export default function SettingsScreen() {
             <View className="border-b border-[#3a3f44] my-2" />
             <SettingsRow
               icon="robot-outline"
-              text="Chat-Bot"
+              text="Ayuda"
               onPress={() => {
                 router.push("/help/helpcenter");
               }}

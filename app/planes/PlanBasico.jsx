@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Linking,
   ImageBackground,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { useNavigation } from "expo-router";
@@ -28,17 +27,18 @@ export default function PlanBasico() {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: title || "Detalle",
-      headerStyle: { backgroundColor: "#e1dcd0" },
+      headerStyle: { backgroundColor: "#282d33" },
+      headerTintColor: "#F5EFE7",
       headerTitleAlign: "center",
       headerRight: () => (
-        <View style={{ marginRight: 12, padding: 8, borderRadius: 999, backgroundColor: "#f3f4f6" }}>
-          <TouchableOpacity onPress={() => alert("Perfil")}> 
-            <AntDesign name="user" size={24} color="black" />
+        <View className="mr-3 p-2 rounded-full bg-slate-800">
+          <TouchableOpacity onPress={() => alert("Perfil")}>
+            <AntDesign name="user" size={24} color="#F5EFE7" />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, title]);
 
   useEffect(() => {
     async function fetchEmpresa() {
@@ -100,66 +100,83 @@ export default function PlanBasico() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>{empresa?.Nombre || "Nombre de la empresa"}</Text>
-
-        <View style={styles.ratingContainer}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => {
-                if (rating !== 0 && rating !== i) {
-                  Alert.alert(
-                    "Cambiar calificación",
-                    "Ya seleccionaste una calificación. ¿Deseas cambiarla?",
-                    [
-                      { text: "Cancelar", style: "cancel" },
-                      {
-                        text: "Sí",
-                        onPress: () => setRating(i),
-                      },
-                    ],
-                    { cancelable: true }
-                  );
-                } else if (rating === 0) {
-                  setRating(i);
-                }
-              }}
-            >
-              <AntDesign
-                name={i <= rating ? "star" : "staro"}
-                size={24}
-                color="gold"
-                style={{ marginHorizontal: 4 }}
-              />
-            </TouchableOpacity>
-          ))}
-          <Text style={styles.ratingText}>{rating}.0</Text>
+    <View className="flex-1 bg-darkBlue-900">
+      <ScrollView className="flex-1 p-6 pt-2">
+        <View className="items-center mb-8">
+          <Text className="text-3xl font-bold text-veryLightBeige-500 mb-2 text-center">
+            {empresa?.Nombre || "Nombre de la empresa"}
+          </Text>
+          <View className="flex-row items-center mb-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TouchableOpacity
+                key={i}
+                onPress={() => {
+                  if (rating !== 0 && rating !== i) {
+                    Alert.alert(
+                      "Cambiar calificación",
+                      "Ya seleccionaste una calificación. ¿Deseas cambiarla?",
+                      [
+                        { text: "Cancelar", style: "cancel" },
+                        {
+                          text: "Sí",
+                          onPress: () => setRating(i),
+                        },
+                      ],
+                      { cancelable: true },
+                    );
+                  } else if (rating === 0) {
+                    setRating(i);
+                  }
+                }}
+              >
+                <AntDesign
+                  name={i <= rating ? "star" : "staro"}
+                  size={24}
+                  color="#facc15"
+                  className="mx-1"
+                />
+              </TouchableOpacity>
+            ))}
+            <Text className="ml-2 text-lightBeige-400 text-xl font-bold">
+              {rating}.0
+            </Text>
+          </View>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.carousel}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="w-full mb-6"
+          contentContainerStyle={{ paddingRight: 16 }}
+        >
           {staticImageUrls.map((url, index) => (
             <Image
               key={index}
               source={{ uri: url }}
-              style={styles.carouselImage}
+              className="w-80 h-52 rounded-xl mr-4 bg-gray-700"
               resizeMode="cover"
             />
           ))}
         </ScrollView>
 
-        <View style={styles.infoSection}>
-          <Text style={styles.infoTitle}>Información del lugar</Text>
-          <Text style={styles.infoText}>{empresa?.Descripcion || "Sin descripción disponible."}</Text>
+        <View className="w-full items-start mb-6">
+          <Text className="font-bold mb-2 text-left text-veryLightBeige-500 text-xl">
+            Información del lugar
+          </Text>
+          <Text className="text-lightBeige-400 text-left leading-6 text-lg font-normal">
+            {empresa?.Descripcion || "Sin descripción disponible."}
+          </Text>
         </View>
 
-        <Text style={styles.subTitle}>Redes Sociales</Text>
-        <View style={styles.socialContainer}>
+        <Text className="font-bold mt-6 mb-2 text-center text-veryLightBeige-500 text-xl">
+          Redes Sociales
+        </Text>
+        <View className="flex-row justify-around w-full mb-8">
           {redes.map((red, idx) => (
             <TouchableOpacity
               key={idx}
-              style={[styles.socialButton, { backgroundColor: red.color }]}
+              className="rounded-md p-3"
+              style={{ backgroundColor: red.color }}
               onPress={() => Linking.openURL(red.url)}
             >
               {red.icon}
@@ -167,139 +184,45 @@ export default function PlanBasico() {
           ))}
         </View>
 
-        <Text style={styles.subTitle}>Ubicación</Text>
-        <Text style={styles.locationText}>
-          {empresa
-            ? `${empresa.Calle} ${empresa.NumExt}${empresa.NumInt ? ", Int. " + empresa.NumInt : ""}, ${empresa.Colonia}, ${empresa.CodigoPost}, ${empresa.Ciudad}`
-            : "Dirección no disponible"}
-        </Text>
+        <View className="w-full items-start mb-8">
+          <Text className="font-bold mt-6 mb-2 text-center text-veryLightBeige-500 text-xl">
+            Ubicación
+          </Text>
+          <Text className="text-lightBeige-400 text-center mt-2 text-lg font-normal">
+            {empresa
+              ? `${empresa.Calle} ${empresa.NumExt}${empresa.NumInt ? ", Int. " + empresa.NumInt : ""}, ${empresa.Colonia}, ${empresa.CodigoPost}, ${empresa.Ciudad}`
+              : "Dirección no disponible"}
+          </Text>
 
-        <TouchableOpacity
-          onPress={() => {
-            const query = encodeURIComponent(
-              `${empresa?.Calle} ${empresa?.NumExt}, ${empresa?.Colonia}, ${empresa?.Ciudad}`
-            );
-            Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
-          }}
-          style={styles.mapContainer}
-        >
-          <ImageBackground
-            source={{
-              uri: "https://www.tintasytonercompatibles.es/images/blog/como-imprimir-mapa-google-maps.jpg",
+          <TouchableOpacity
+            onPress={() => {
+              const query = encodeURIComponent(
+                `${empresa?.Calle} ${empresa?.NumExt}, ${empresa?.Colonia}, ${empresa?.Ciudad}`,
+              );
+              Linking.openURL(
+                `https://www.google.com/maps/search/?api=1&query=${query}`,
+              );
             }}
-            style={styles.mapImage}
-            imageStyle={{ borderRadius: 16 }}
-          ></ImageBackground>
-        </TouchableOpacity>
+            className="w-full mt-4 rounded-xl overflow-hidden h-48"
+          >
+            <ImageBackground
+              source={{
+                uri: "https://www.tintasytonercompatibles.es/images/blog/como-imprimir-mapa-google-maps.jpg",
+              }}
+              className="w-full h-full opacity-80"
+            />
+          </TouchableOpacity>
+        </View>
 
         <View style={{ height: 80 }} />
       </ScrollView>
 
-      <TouchableOpacity style={styles.callButton} onPress={hacerLlamada}>
+      <TouchableOpacity
+        className="absolute right-5 bottom-5 bg-green-400 rounded-full p-4 shadow-md elevation-5"
+        onPress={hacerLlamada}
+      >
         <Ionicons name="call" size={24} color="#fff" />
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 8,
-    textAlign: "center",
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 8,
-    justifyContent: "center",
-  },
-  ratingText: {
-    marginLeft: 8,
-    color: "#6b7280",
-  },
-  carousel: {
-    marginTop: 8,
-  },
-  carouselImage: {
-    width: 211,
-    height: 211,
-    marginRight: 8,
-    borderRadius: 12,
-    backgroundColor: "#d1d5db",
-  },
-  infoSection: {
-    width: "100%",
-    marginTop: 20,
-  },
-  infoTitle: {
-    fontWeight: "bold",
-    marginBottom: 8,
-    textAlign: "left",
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#374151",
-    textAlign: "left",
-  },
-  subTitle: {
-    fontWeight: "bold",
-    marginTop: 24,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  socialContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-  },
-  socialButton: {
-    borderRadius: 10,
-    padding: 12,
-  },
-  locationText: {
-    fontSize: 14,
-    color: "#374151",
-    textAlign: "center",
-  },
-  mapContainer: {
-    width: "100%",
-    marginTop: 16,
-  },
-  mapImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  mapText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  callButton: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    backgroundColor: "#10b981",
-    borderRadius: 50,
-    padding: 16,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
-  },
-});

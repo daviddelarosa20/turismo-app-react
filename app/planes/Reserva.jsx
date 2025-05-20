@@ -1,4 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from "react-native";
 import { useNavigation, useLocalSearchParams, router } from "expo-router";
 import { useLayoutEffect, useState, useEffect } from "react";
 import CalendarioS from "../../components/Calendario";
@@ -6,7 +13,7 @@ import { supabase } from "../../supabase/supabase";
 
 export default function Reserva() {
   const navigation = useNavigation();
-  const { title } = useLocalSearchParams(); 
+  const { title } = useLocalSearchParams();
   const [empresa, setEmpresa] = useState(null);
   const [personas, setPersonas] = useState(null);
   const [nombre, setNombre] = useState("");
@@ -26,7 +33,8 @@ export default function Reserva() {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Reservar",
-      headerStyle: { backgroundColor: "#e1dcd0" },
+      headerStyle: { backgroundColor: "#282d33" },
+      headerTintColor: "#F5EFE7",
       headerTitleAlign: "center",
     });
   }, []);
@@ -52,13 +60,33 @@ export default function Reserva() {
       return ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM"];
     } else if (turno === "Tarde") {
       return [
-        "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM",
-        "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"
+        "12:00 PM",
+        "12:30 PM",
+        "1:00 PM",
+        "1:30 PM",
+        "2:00 PM",
+        "3:00 PM",
+        "4:00 PM",
+        "5:00 PM",
+        "6:00 PM",
       ];
     } else if (turno === "Noche") {
       return [
-        "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM", "10:00 PM",
-        "10:30 PM", "11:00 PM", "11:30 PM", "12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM"
+        "6:30 PM",
+        "7:00 PM",
+        "7:30 PM",
+        "8:00 PM",
+        "8:30 PM",
+        "9:00 PM",
+        "9:30 PM",
+        "10:00 PM",
+        "10:30 PM",
+        "11:00 PM",
+        "11:30 PM",
+        "12:00 AM",
+        "12:30 AM",
+        "1:00 AM",
+        "1:30 AM",
       ];
     }
     return [];
@@ -85,13 +113,14 @@ export default function Reserva() {
       empresa: typeof (empresa?.Nombre || title),
     });
 
-    if (!empresa?.Nombre && !title) return alert("Error con la empresa, intenta de nuevo.");
+    if (!empresa?.Nombre && !title)
+      return alert("Error con la empresa, intenta de nuevo.");
     if (!nombre) return alert("Ingresa tu nombre.");
     if (!telefono) return alert("Ingresa tu número de teléfono.");
     if (!personas) return alert("Selecciona el número de personas.");
     if (!fecha) return alert("Selecciona una fecha.");
     if (!hora) return alert("Selecciona una hora.");
-    
+
     const { data, error } = await supabase.from("reservaciones").insert([
       {
         nombre,
@@ -122,107 +151,118 @@ export default function Reserva() {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, backgroundColor: "white" }}>
-      <Text className="text-xl font-bold text-center mb-2">
+    <ScrollView
+      className="flex-1 bg-darkBlue-900 p-6"
+      contentContainerStyle={{ paddingBottom: 20 }}
+    >
+      <Text className="text-3xl font-bold text-center mb-4 text-veryLightBeige-500 mt-2">
         {empresa?.Nombre}
       </Text>
-      <Text className="text-right text-gray-500 mb-4">1 de 2</Text>
+      <Text className="text-right text-gray-500 mb-6">1 de 2</Text>
 
-      <Text className="text-lg font-semibold mb-2">Agregar detalles de reserva:</Text>
+      <Text className="text-xl font-semibold mb-3 text-veryLightBeige-500">
+        Agregar detalles de reserva:
+      </Text>
 
-      <Text className="mt-4 mb-2 font-semibold">Elegir número de personas</Text>
-      <View className="flex-row flex-wrap items-center justify-center gap-2">
+      <Text className="mt-5 mb-2 font-semibold text-veryLightBeige-500">
+        Elegir número de personas
+      </Text>
+      <View className="flex-row flex-wrap items-center justify-center gap-3">
         {[...Array(10)].map((_, i) => (
           <TouchableOpacity
             key={i}
-            className={`w-12 h-10 items-center justify-center rounded bg-gray-200 ${
-              personas === i + 1 ? "bg-green-300" : ""
+            className={`w-12 h-10 items-center justify-center rounded-md ${
+              personas === i + 1 ? "bg-green-300" : "bg-slate-700"
             }`}
             onPress={() => setPersonas(i + 1)}
           >
-            <Text>{i + 1}</Text>
+            <Text className="text-white">{i + 1}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Text className="mt-6 mb-1 font-semibold">Nombre</Text>
+      <Text className="mt-7 mb-2 font-semibold text-veryLightBeige-500">
+        Nombre
+      </Text>
       <TextInput
-        className="border rounded p-2"
+        className="border rounded-md p-3 text-gray-100 bg-slate-800"
         placeholder="Tu nombre"
+        placeholderTextColor="#cbd5e0"
         value={nombre}
         onChangeText={setNombre}
       />
 
-      <Text className="mt-4 mb-1 font-semibold">Número de teléfono</Text>
+      <Text className="mt-5 mb-2 font-semibold text-veryLightBeige-500">
+        Número de teléfono
+      </Text>
       <TextInput
-        className="border rounded p-2"
+        className="border rounded-md p-3 text-gray-100 bg-slate-800"
         placeholder="+52 1234567890"
+        placeholderTextColor="#cbd5e0"
         keyboardType="phone-pad"
         value={telefono}
         onChangeText={setTelefono}
       />
 
-      <Text className="mt-6 mb-2 font-semibold">Seleccionar fecha:</Text>
-      <Text className="text-center text-lg font-medium mb-2">{fecha}</Text>
-      <CalendarioS onSelectFecha={setFecha} />
+      <Text className="mt-7 mb-3 font-semibold text-veryLightBeige-500">
+        Seleccionar fecha:
+      </Text>
+      <Text className="text-center text-lg font-medium mb-4 text-lightBeige-400">
+        {fecha}
+      </Text>
+      <CalendarioS
+        onSelectFecha={(newFecha) => setFecha(newFecha)}
+        textColor="#F5EFE7"
+      />
 
-      <Text className="mt-4 mb-2 font-semibold">Seleccionar hora:</Text>
+      <Text className="mt-5 mb-3 font-semibold text-veryLightBeige-500">
+        Seleccionar hora:
+      </Text>
 
-<View className="flex-row justify-around my-2">
-  {["Mañana", "Tarde", "Noche"].map((rango) => (
-    <TouchableOpacity
-      key={rango}
-      onPress={() => {
-        setTurno(rango);
-        setHora(null);
-      }}
-      style={{
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        backgroundColor: turno === rango ? "#facc15" : "#fef3c7",
-        borderRadius: 10,
-        marginHorizontal: 5,
-      }}
-    >
-      <Text style={{ fontWeight: "bold" }}>{rango}</Text>
-    </TouchableOpacity>
-  ))}
-</View>
-
-{turno && (
-  <View style={{ paddingHorizontal: 10, marginTop: 10 }}>
-    {chunkArray(obtenerHoras(), 3).map((fila, filaIndex) => (
-      <View
-        key={filaIndex}
-        style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}
-      >
-        {fila.map((horaItem) => (
+      <View className="flex-row justify-around my-3">
+        {["Mañana", "Tarde", "Noche"].map((rango) => (
           <TouchableOpacity
-            key={horaItem}
-            onPress={() => setHora(horaItem)}
-            style={{
-              flex: 1,
-              marginHorizontal: 5,
-              backgroundColor: hora === horaItem ? "#fde68a" : "#e5e7eb",
-              paddingVertical: 12,
-              borderRadius: 10,
-              alignItems: "center",
+            key={rango}
+            onPress={() => {
+              setTurno(rango);
+              setHora(null);
             }}
+            className={`px-5 py-2 rounded-md ${
+              turno === rango ? "bg-yellow-400" : "bg-yellow-200"
+            }`}
           >
-            <Text>{horaItem}</Text>
+            <Text className="font-bold text-black">{rango}</Text>
           </TouchableOpacity>
         ))}
       </View>
-    ))}
-  </View>
-)}
 
+      {turno && (
+        <View className="px-2 mt-4">
+          {chunkArray(obtenerHoras(), 3).map((fila, filaIndex) => (
+            <View key={filaIndex} className="flex-row justify-between mb-3">
+              {fila.map((horaItem) => (
+                <TouchableOpacity
+                  key={horaItem}
+                  onPress={() => setHora(horaItem)}
+                  className={`flex-1 mx-1 rounded-md py-3 items-center ${
+                    hora === horaItem ? "bg-yellow-500" : "bg-slate-700"
+                  }`}
+                >
+                  <Text className="text-white">{horaItem}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+        </View>
+      )}
 
       <TouchableOpacity
-        className="bg-green-200 p-3 rounded-full items-center mt-6"
+        className="bg-green-300 p-4 rounded-full items-center mt-8"
         onPress={guardarReserva}
       >
-        <Text className="text-black font-bold">Confirmar</Text>
+        <Text className="text-darkBlue-900 font-bold text-lg">
+          Confirmar Reserva
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

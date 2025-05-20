@@ -10,7 +10,7 @@ const CardEvento = ({
   onSelectAsiento,
 }) => {
   return (
-    <View className="bg-white rounded-lg shadow-md mb-4 overflow-hidden w-[45%]">
+    <View className="bg-white rounded-lg shadow-md mb-4 overflow-hidden">
       <Image
         source={{ uri: imagen }}
         className="w-full h-32"

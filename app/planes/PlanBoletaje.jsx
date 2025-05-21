@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  TextInput,
+  ImageBackground,
+  Linking,
 } from "react-native";
 
 import { useNavigation } from "expo-router";
@@ -14,7 +15,6 @@ import { useLayoutEffect, useState, useEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import StarRating from "../../components/StarRating";
 import { supabase } from "../../supabase/supabase";
-import GoogleMap from "../../components/GoogleMap";
 import { useRouter } from "expo-router";
 
 export default function PlanBoletaje() {
@@ -25,19 +25,37 @@ export default function PlanBoletaje() {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: title || "Detalle",
-      headerStyle: { backgroundColor: "#e1dcd0" },
+      headerStyle: { backgroundColor: "#282d33" },
       headerTitleAlign: "center",
+      headerTintColor: "#F5EFE7",
       headerRight: () => (
-        <View className="items-center justify-center mr-3 rounded-full bg-slate-100 p-2">
+        <View className="items-center justify-center mr-3 rounded-full bg-slate-800 p-2">
           <TouchableOpacity onPress={() => alert("Perfil")}>
-            <AntDesign name="user" size={24} color="black" />
+            <AntDesign name="user" size={24} color="#F5EFE7" />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, title]);
 
   const [valoracion, setValoracion] = useState(null);
+  const [empresa, setEmpresa] = useState(null);
+
+  const getempresa = async () => {
+    let { data: Empresa, error } = await supabase
+      .from("Empresas")
+      .select("*")
+      .eq("Nombre", title)
+      .single();
+    if (error) {
+      console.log(error);
+    } else {
+      setEmpresa(Empresa);
+    }
+  };
+  useEffect(() => {
+    getempresa();
+  }, [title]);
 
   const getvaloracion = async () => {
     let { data: Valoracion, error } = await supabase
@@ -53,55 +71,115 @@ export default function PlanBoletaje() {
   };
   useEffect(() => {
     getvaloracion();
-  }, []);
+  }, [title]);
+
+  const staticImages = [
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//Teatro.jpg",
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//RecP.jpg",
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//Obra.jpg",
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//EmptyT.jpg",
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//Image.jpg",
+  ];
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView>
-        <View className="w-full h-full mb-12">
-          <View className="flex-1 items-center justify-center mt-10 mb-44">
-            <Text className="text-3xl font-bold mb-2">{title}</Text>
-            <View className="flex-row items-center justify-center mb-2">
+    <SafeAreaView className="flex-1 bg-darkBlue-900">
+      {/* Fondo oscuro */}
+      <ScrollView className="flex-1">
+        <View className="p-4 pt-2 items-center">
+          <View className="items-center mb-8">
+            <Text className="text-3xl font-bold text-veryLightBeige-500 mb-2">
+              {title}
+            </Text>{" "}
+            {/* Texto claro */}
+            <View className="flex-row items-center mb-4">
               {valoracion?.Valoracion && (
-                <StarRating rating={valoracion.Valoracion} />
+                <StarRating
+                  rating={valoracion.Valoracion}
+                  starSize={20}
+                  starColor="#D8C4B6"
+                />
               )}
-              <Text className="text-xl font-bold ml-2 color-slate-500">
+              <Text className="text-xl font-bold ml-2 text-lightBeige-400">
+                {" "}
+                {/* Texto beige */}
                 {valoracion?.Valoracion}
               </Text>
             </View>
-            <Image
-              source={{ uri: imageUrl }}
-              className="w-full h-72 rounded-xl mt-2 bg-gray-400"
-            />
-            <Text className="text-xl font-bold mt-3 mr-64">
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="w-full mb-6"
+            contentContainerStyle={{ paddingRight: 16 }}
+          >
+            {staticImages.map((image, index) => (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                className="w-80 h-52 rounded-xl mr-4 bg-gray-700"
+              />
+            ))}
+          </ScrollView>
+          <View className="w-full items-start mb-6">
+            <Text className="text-xl font-bold text-veryLightBeige-500 mb-2">
               Información del lugar
             </Text>
-            <Text className="text-xl font-normal mb-2 mr-64">
+            <Text className="text-lg font-normal text-lightBeige-400">
               {description}
             </Text>
-            <Text className="text-lg font-normal mb-2 mr-30">{direccion}</Text>
-            <View className="w-full h-60 mt-2">
-              <View className="w-full h-60 mt-28 mb-5">
-                <GoogleMap />
-              </View>
-            </View>
-            <View>
-              <TouchableOpacity
-                className="mt-60 bg-green-200 px-8 py-3 rounded-full mb-5"
-                onPress={() => {
-                  router.push({
-                    pathname: "/planes/Evento",
-                    params: {
-                      title: title
-                    }
-                  });
-                }}
-              >
-                <Text className="font-semibold text-black">
-                  Ver próximos eventos
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
+          <View className="flex-row justify-around mt-4 mb-8 w-4/5">
+            {[
+              "https://cdn-icons-png.flaticon.com/512/1384/1384063.png",
+              "https://img.icons8.com/ios_filled/512/twitterx.png",
+              "https://upload.wikimedia.org/wikipedia/commons/6/6c/Facebook_Logo_2023.png",
+              "https://static.vecteezy.com/system/resources/previews/016/716/450/non_2x/tiktok-icon-free-png.png",
+            ].map((uri, idx) => (
+              <Image
+                key={idx}
+                source={{ uri }}
+                className="w-8 h-8 rounded-md"
+              />
+            ))}
+          </View>
+          <View className="w-full items-start mb-8">
+            <Text className="text-lg font-bold text-veryLightBeige-500 mb-2">
+              Ubicación
+            </Text>
+            <Text className="text-lg font-normal text-lightBeige-400 mb-3">
+              {direccion}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                const query = encodeURIComponent(
+                  `${empresa?.Calle} ${empresa?.NumExt}, ${empresa?.Colonia}, ${empresa?.Ciudad}`,
+                );
+                Linking.openURL(`http://google.com/maps/place/${query}`);
+              }}
+              className="w-full h-48 rounded-xl overflow-hidden"
+            >
+              <ImageBackground
+                source={{
+                  uri: "https://www.tintasytonercompatibles.es/images/blog/como-imprimir-mapa-google-maps.jpg",
+                }}
+                className="w-full h-full"
+              />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            className="mt-10 bg-green-300 px-8 py-3 rounded-full"
+            onPress={() => {
+              router.push({
+                pathname: "/planes/Evento",
+                params: {
+                  title: title,
+                },
+              });
+            }}
+          >
+            <Text className="font-semibold text-darkBlue-900">
+              Ver próximos eventos
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,5 +1,12 @@
 import { Text, View, Image, TouchableOpacity } from "react-native";
 
+const Colors = {
+  darkBlue: "#1a1e22",
+  mediumBlue: "#3E5879",
+  lightBeige: "#D8C4B6",
+  veryLightBeige: "#F5EFE7",
+};
+
 export default function Card({
   imageUrl = "https://via.placeholder.com/300x200",
   title = "Título de la tarjeta",
@@ -9,7 +16,10 @@ export default function Card({
   onPress = () => console.log("Botón presionado"),
 }) {
   return (
-    <View className="bg-white rounded-xl shadow-md overflow-hidden w-[90%] mx-auto my-3">
+    <View
+      style={{ backgroundColor: Colors.veryLightBeige }}
+      className="rounded-xl shadow-md overflow-hidden w-[90%] mx-auto my-3"
+    >
       {/* Imagen */}
       <Image
         source={{ uri: imageUrl }}
@@ -19,22 +29,39 @@ export default function Card({
 
       {/* Contenido */}
       <View className="p-4">
-        {/* Título */}
-        <Text className="text-xl font-bold text-gray-800 mb-2">{title}</Text>
+        {/* Título*/}
+        <Text
+          style={{ color: Colors.darkBlue }}
+          className="text-xl font-bold mb-2"
+        >
+          {title}
+        </Text>
 
         {/* Descripción */}
-        <Text className="text-gray-600 mb-4">{description}</Text>
+        <Text style={{ color: Colors.mediumBlue }} className="mb-4">
+          {description}
+        </Text>
 
         {/* Dirección */}
-        <Text className="text-gray-600 mb-4">{direccion}</Text>
+        <Text style={{ color: Colors.mediumBlue }} className="mb-4">
+          {direccion}
+        </Text>
 
         {/* Contenedor para botón alineado a la derecha */}
         <View className="flex-row justify-end">
           <TouchableOpacity
             onPress={onPress}
-            className="bg-blue-500 px-4 py-2 rounded-lg"
+            // Fondo del botón: usa mediumBlue
+            style={{ backgroundColor: Colors.mediumBlue }}
+            className="px-4 py-2 rounded-lg"
           >
-            <Text className="text-white font-medium">{buttonText}</Text>
+            {/* Texto del botón: usa veryLightBeige */}
+            <Text
+              style={{ color: Colors.veryLightBeige }}
+              className="font-medium"
+            >
+              {buttonText}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

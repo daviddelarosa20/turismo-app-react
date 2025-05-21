@@ -1,105 +1,70 @@
-import { Text, View, Image, SafeAreaView, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { supabase } from '../../supabase/supabase';
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { supabase } from "../../supabase/supabase";
 
 export default function Pago() {
-  const { Title, Description, Imagen, Fecha, Hora, asientosSeleccionados, cantidadAsientos, idEvento: eventoId } = useLocalSearchParams();
+  const {
+    Title,
+    Description,
+    Imagen,
+    Fecha,
+    Hora,
+    asientosSeleccionados,
+    cantidadAsientos,
+    idEvento: eventoId,
+  } = useLocalSearchParams();
   const navigation = useNavigation();
-  const [numeroTarjeta, setNumeroTarjeta] = useState('');
-  const [fechaVencimiento, setFechaVencimiento] = useState('');
-  const [cvv, setCvv] = useState('');
+  const [numeroTarjeta, setNumeroTarjeta] = useState("");
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
+  const [cvv, setCvv] = useState("");
   const [costo, setCosto] = useState(0);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Pago',
-      headerStyle: {
-        backgroundColor: '#fff',
-      },
-      headerTintColor: '#000',
+      title: "Pago",
+      headerStyle: { backgroundColor: "#282d33" },
+      headerTintColor: "#F5EFE7",
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
         fontSize: 18,
-        textAlign: 'center',
+        textAlign: "center",
       },
     });
   }, [navigation]);
 
-// Eliminar este useEffect ya que la lógica de redirección se maneja en el otro useEffect
-  // React.useEffect(() => {
-  //   if (costo === 0) {
-  //     navigation.navigate('planes/confirmacionB', {
-  //       Title,
-  //       Description,
-  //       Imagen,
-  //       Fecha,
-  //       Hora,
-  //       cantidadAsientos,
-  //       costo,
-  //       numeroTarjeta: 'GRATIS',
-  //       fechaVencimiento: 'N/A',
-  //       cvv: 'N/A',
-  //       asientosSeleccionados
-  //     });
-  //   }
-  // }, [costo]);
-
-  // Obtener el costo del evento desde Supabase
   useEffect(() => {
     const obtenerCostoEvento = async () => {
       try {
-        console.log('Buscando costo para evento:', Title);
+        console.log("Buscando costo para evento:", Title);
         const { data: evento, error: eventoError } = await supabase
-          .from('Eventos')
-          .select('Costo')
-          .eq('Titulo', Title)
+          .from("Eventos")
+          .select("Costo")
+          .eq("Titulo", Title)
           .single();
 
         if (eventoError) {
-          console.error('Error al obtener el costo:', eventoError);
+          console.error("Error al obtener el costo:", eventoError);
           return;
         }
 
         if (!evento) {
-          console.error('Evento no encontrado:', Title);
+          console.error("Evento no encontrado:", Title);
           return;
         }
 
-        console.log('Costo base encontrado:', evento.Costo);
-        console.log('Cantidad de asientos:', cantidadAsientos);
-
-        // Calcular el costo total (costo por asiento * cantidad de asientos)
         const costoTotal = evento.Costo * (cantidadAsientos || 1);
-        console.log('Costo total calculado:', costoTotal);
-        
-        // Guardar el costo y el idEvento
         setCosto(costoTotal);
-        setEventoId(evento.idEvento);
-
-        // Si el costo es 0, redirigir inmediatamente a confirmacionB
-        if (costoTotal === 0) {
-          // Navegar a confirmacionB con el idEvento
-          navigation.navigate('planes/confirmacionB', {
-            Title,
-            Description,
-            Imagen,
-            Fecha,
-            Hora,
-            cantidadAsientos,
-            costo: 0,
-            numeroTarjeta: 'GRATIS',
-            fechaVencimiento: 'N/A',
-            cvv: 'N/A',
-            asientosSeleccionados,
-            idEvento: evento.idEvento
-          });
-          return;
-        }
-        const eventoId = eventoData.idEvento;
-        setEventoId(eventoId);
       } catch (error) {
-        console.error('Error al obtener el costo:', error);
+        console.error("Error al obtener el costo:", error);
       }
     };
 
@@ -109,135 +74,156 @@ export default function Pago() {
   }, [Title, cantidadAsientos]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView contentContainerStyle={{ alignItems: "center", paddingBottom: 40 }}>
-        <View className="w-full p-4">
-          <View className="bg-white rounded-lg shadow-md p-3">
-            <View className="flex-row">
-              <Image
-                source={{ uri: Imagen }}
-                className="w-32 h-32 rounded-lg"
-                resizeMode="cover"
-              />
-              <View className="flex-1 ml-4 justify-between">
-                <View>
-                  <Text className="text-lg font-bold mb-1">{Title}</Text>
-                  <Text className="text-gray-600 text-sm mb-2" numberOfLines={2}>
-                    {Description}
-                  </Text>
-                </View>
-                <View>
-                  <Text className="text-gray-600 text-sm font-semibold"> {Fecha}</Text>
-                  <Text className="text-gray-600 text-sm font-semibold"> {Hora}</Text>
-                </View>
+    <SafeAreaView className="flex-1 bg-darkBlue-900">
+      <ScrollView contentContainerStyle={{ alignItems: "center", padding: 20 }}>
+        <View className="w-full mb-6 bg-mediumBlue-800 rounded-lg shadow-md p-4">
+          <View className="flex-row items-center">
+            <Image
+              source={{ uri: Imagen }}
+              className="w-24 h-24 rounded-lg"
+              resizeMode="cover"
+            />
+            <View className="ml-4 flex-1 justify-between">
+              <View>
+                <Text className="text-lg font-bold text-veryLightBeige-500 mb-1">
+                  {Title}
+                </Text>
+                <Text className="text-black text-sm mb-2" numberOfLines={2}>
+                  {Description}
+                </Text>
+              </View>
+              <View>
+                <Text className="text-black text-sm font-semibold">
+                  {Fecha}
+                </Text>
+                <Text className="text-black text-sm font-semibold">{Hora}</Text>
               </View>
             </View>
           </View>
+        </View>
 
-          {/* Formulario de pago */}
-          <View className="w-full mt-8">
-            <Text className="text-lg font-bold mb-4 text-center">Ingrese tarjeta de Débito/Crédito para pagar</Text>
-            
-            {/* Número de tarjeta */}
-            <View className="mb-4">
-              <TextInput
-                placeholder="Número de tarjeta"
-                value={numeroTarjeta}
-                onChangeText={setNumeroTarjeta}
-                keyboardType="numeric"
-                maxLength={16}
-                className="border border-gray-300 rounded-lg p-3 w-full"
-              />
-            </View>
+        {/* Formulario de pago */}
+        <View className="w-full mt-8 p-4 bg-mediumBlue-800 rounded-lg shadow-md">
+          <Text className="text-xl font-bold mb-4 text-veryLightBeige-500 text-center">
+            Ingrese datos de pago
+          </Text>
 
-            {/* Fecha de vencimiento */}
-            <View className="mb-4">
-              <TextInput
-                placeholder="Fecha de vencimiento (MM/YY)"
-                value={fechaVencimiento}
-                onChangeText={setFechaVencimiento}
-                keyboardType="numeric"
-                maxLength={5}
-                className="border border-gray-300 rounded-lg p-3 w-full"
-              />
-            </View>
+          {/* Número de tarjeta */}
+          <View className="mb-4">
+            <Text className="text-lightBeige-400 mb-1">Número de tarjeta</Text>
+            <TextInput
+              placeholder="Número de tarjeta"
+              value={numeroTarjeta}
+              onChangeText={setNumeroTarjeta}
+              keyboardType="numeric"
+              maxLength={16}
+              className="border border-gray-600 rounded-lg p-3 w-full text-black bg-darkBlue-900"
+            />
+          </View>
 
-            {/* CVV */}
-            <View className="mb-8">
-              <TextInput
-                placeholder="CVV"
-                value={cvv}
-                onChangeText={setCvv}
-                keyboardType="numeric"
-                maxLength={3}
-                className="border border-gray-300 rounded-lg p-3 w-full"
-              />
-            </View>
+          {/* Fecha de vencimiento */}
+          <View className="mb-4">
+            <Text className="text-lightBeige-400 mb-1">
+              Fecha de vencimiento (MM/YY)
+            </Text>
+            <TextInput
+              placeholder="MM/YY"
+              value={fechaVencimiento}
+              onChangeText={setFechaVencimiento}
+              keyboardType="text"
+              maxLength={5}
+              className="border border-gray-600 rounded-lg p-3 w-full text-black bg-darkBlue-900"
+            />
+          </View>
 
-            {/* Botón de pago */}
-            <View className="mb-8">
-              <Text className="text-lg font-bold mb-2">Costo Final: ${costo.toFixed(2)}</Text>
-            </View>
+          {/* CVV */}
+          <View className="mb-6">
+            <Text className="text-lightBeige-400 mb-1">CVV</Text>
+            <TextInput
+              placeholder="CVV"
+              value={cvv}
+              onChangeText={setCvv}
+              keyboardType="numeric"
+              maxLength={3}
+              className="border border-gray-600 rounded-lg p-3 w-full text-black bg-darkBlue-900"
+            />
+          </View>
 
-            <TouchableOpacity
-              className="bg-blue-500 p-3 rounded-lg w-full"
-              onPress={async () => {
-                try {
-                  // Validar que todos los campos estén completos
-                  if (!numeroTarjeta || numeroTarjeta.length !== 16) {
-                    alert('Por favor ingrese un número de tarjeta válido (16 dígitos)');
-                    return;
-                  }
+          {/* Costo Final */}
+          <View className="mb-8 items-center">
+            <Text className="text-lg font-bold text-lightBeige-400">
+              Costo Final: ${costo.toFixed(2)}
+            </Text>
+          </View>
 
-                  if (!fechaVencimiento || fechaVencimiento.length !== 5) {
-                    alert('Por favor ingrese una fecha de vencimiento válida (MM/YY)');
-                    return;
-                  }
+          {/* Botón de pago */}
+          <TouchableOpacity
+            className="bg-green-600 p-4 rounded-lg w-full items-center"
+            onPress={async () => {
+              try {
+                if (!numeroTarjeta || numeroTarjeta.length !== 16) {
+                  alert(
+                    "Por favor ingrese un número de tarjeta válido (16 dígitos)",
+                  );
+                  return;
+                }
 
-                  if (!cvv || cvv.length !== 3) {
-                    alert('Por favor ingrese un CVV válido (3 dígitos)');
-                    return;
-                  }
+                if (!fechaVencimiento || fechaVencimiento.length !== 5) {
+                  alert(
+                    "Por favor ingrese una fecha de vencimiento válida (MM/YY)",
+                  );
+                  return;
+                }
 
-                  // Navegar a la página de confirmación con los datos
-                  const asientosIDs = await Promise.all(JSON.parse(asientosSeleccionados).map(async (asiento) => {
-                    const { data: asientoData, error: asientoError } = await supabase
-                      .from('Asientos')
-                      .select('idAsiento')
-                      .eq('idEvento', parseInt(eventoId)) // Convertir a número
-                      .eq('Fila', asiento.Fila)
-                      .eq('Columna', asiento.Columna)
-                      .single();
+                if (!cvv || cvv.length !== 3) {
+                  alert("Por favor ingrese un CVV válido (3 dígitos)");
+                  return;
+                }
+
+                const asientosIDs = await Promise.all(
+                  JSON.parse(asientosSeleccionados).map(async (asiento) => {
+                    const { data: asientoData, error: asientoError } =
+                      await supabase
+                        .from("Asientos")
+                        .select("idAsiento")
+                        .eq("idEvento", parseInt(eventoId))
+                        .eq("Fila", asiento.Fila)
+                        .eq("Columna", asiento.Columna)
+                        .single();
 
                     if (asientoError) throw asientoError;
-                    if (!asientoData) throw new Error('Asiento no encontrado');
+                    if (!asientoData) throw new Error("Asiento no encontrado");
                     return asientoData.idAsiento;
-                  }));
+                  }),
+                );
 
-                  navigation.navigate('planes/confirmacionB', {
-                    Title,
-                    Description,
-                    Imagen,
-                    Fecha,
-                    Hora,
-                    cantidadAsientos,
-                    costo,
-                    numeroTarjeta: numeroTarjeta.slice(-4), // Solo mostrar los últimos 4 dígitos
-                    fechaVencimiento,
-                    cvv: cvv.slice(-2), // Solo mostrar los últimos 2 dígitos del CVV
-                    asientosSeleccionados: asientosSeleccionados, // Ya viene como string de Asientos.jsx
-                    asientosIDs: JSON.stringify(asientosIDs),
-                    idEvento: eventoId // Usar el eventoId guardado en el estado
-                  });
-                } catch (error) {
-                  console.error('Error al procesar el pago:', error);
-                  alert('Error al procesar el pago. Por favor, inténtelo de nuevo.');
-                }
-              }}
-            >
-              <Text className="text-white text-center font-bold">Pagar</Text>
-            </TouchableOpacity>
-          </View>
+                navigation.navigate("planes/confirmacionB", {
+                  Title,
+                  Description,
+                  Imagen,
+                  Fecha,
+                  Hora,
+                  cantidadAsientos,
+                  costo,
+                  numeroTarjeta: numeroTarjeta.slice(-4),
+                  fechaVencimiento,
+                  cvv: cvv.slice(-2),
+                  asientosSeleccionados: asientosSeleccionados,
+                  asientosIDs: JSON.stringify(asientosIDs),
+                  idEvento: eventoId,
+                });
+              } catch (error) {
+                console.error("Error al procesar el pago:", error);
+                alert(
+                  "Error al procesar el pago. Por favor, inténtelo de nuevo.",
+                );
+              }
+            }}
+          >
+            <Text className="text-white text-center font-bold text-lg">
+              Pagar
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

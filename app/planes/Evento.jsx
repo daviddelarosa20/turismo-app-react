@@ -11,6 +11,7 @@ export default function Evento() {
   const router = useRouter();
   const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
   const [eventos, setEventos] = useState([]);
+
   const getEventos = async () => {
     let { data: Eventos, error } = await supabase
       .from("Eventos")
@@ -21,34 +22,35 @@ export default function Evento() {
       setEventos(Eventos);
     }
   };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Cartelera",
-      headerStyle: { backgroundColor: "#e1dcd0" },
+      headerStyle: { backgroundColor: "#282d33" },
       headerTitleAlign: "center",
+      headerTintColor: "#F5EFE7",
     });
-  }, []);
+  }, [navigation]);
+
   useEffect(() => {
     getEventos();
   }, []);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView>
+    <SafeAreaView className="flex-1 bg-darkBlue-900">
+      <ScrollView className="flex-1 p-4">
         <View>
-          <View className="w-full mt-5 mb-2">
-            <Text className="text-xl font-bold mb-2 ml-5">
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-veryLightBeige-500 mb-4">
               Eventos disponibles
             </Text>
-            <View className="flex-row flex-wrap justify-evenly px-2">
+            <View className="gap-y-4">
+              {" "}
+              {/* Usamos solo gap-y para el espaciado vertical */}
               {eventos.map((evento, index) => (
-                <CardEvento
+                <TouchableOpacity
                   key={index}
-                  imagen={evento.Image}
-                  titulo={evento.Titulo}
-                  descripcion={evento.Descripcion}
-                  fecha={evento.Fecha}
-                  hora={evento.Hora}
-                  onSelectAsiento={() => {
+                  onPress={() => {
                     router.push({
                       pathname: `/planes/Asientos`,
                       params: {
@@ -60,21 +62,34 @@ export default function Evento() {
                       },
                     });
                   }}
-                />
+                  className="w-full mb-4" // Cada tarjeta ocupa el ancho completo
+                >
+                  <CardEvento
+                    imagen={evento.Image}
+                    titulo={evento.Titulo}
+                    descripcion={evento.Descripcion}
+                    fecha={evento.Fecha}
+                    hora={evento.Hora}
+                  />
+                </TouchableOpacity>
               ))}
             </View>
-            {/*<Text className="text-xl font-bold mb-2 ml-5">
+          </View>
+
+          {/* Sección del calendario (opcional) */}
+          {/* <View className="mb-8">
+            <Text className="text-xl font-bold text-veryLightBeige-500 mb-4">
               Selecciona fecha
             </Text>
-            <View className="mt-3 w-full items-center justify-center gap-3">
+            <View className="w-full items-center justify-center">
               <Calendario
                 onFechaSeleccionada={(fecha) => {
                   setFechaSeleccionada(fecha);
                   console.log(fecha);
                 }}
               />
-            </View> */}
-          </View>
+            </View>
+          </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>

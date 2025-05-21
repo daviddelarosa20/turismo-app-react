@@ -26,9 +26,9 @@ export default function Perfil() {
   useEffect(() => {
     async function obtenerDatosUsuario() {
       const { data, error } = await supabase
-        .from("Users")
+        .from("Usuarios")
         .select("idUser, Nombre, Apellido, Email, Telefono, Apodo")
-        .eq("Apodo", "jonahdezd") // apodo fijo inicial (puede ser de sesión luego)
+        .eq("Apodo", "HuGol") // apodo fijo inicial (puede ser de sesión luego)
         .single();
 
       if (error) {
@@ -125,7 +125,7 @@ export default function Perfil() {
                 try {
                   //Se hace la busqueda del usuario actual por su apodo :D
                   const { data: usuarioActual, error: errorUsuario } = await supabase
-                    .from("Users")
+                    .from("Usuarios")
                     .select("idUser")
                     .eq("Apodo", apodoOriginal)
                     .single();
@@ -139,7 +139,7 @@ export default function Perfil() {
 
                   //Validamos el apado duplicado
                   const { data: apodoRepetido } = await supabase
-                    .from("Users")
+                    .from("Usuarios")
                     .select("idUser")
                     .eq("Apodo", nickname)
                     .neq("idUser", idActual)
@@ -152,7 +152,7 @@ export default function Perfil() {
 
                   //Validamos el correo duplicado
                   const { data: emailRepetido } = await supabase
-                    .from("Users")
+                    .from("Usuarios")
                     .select("idUser")
                     .eq("Email", email)
                     .neq("idUser", idActual)
@@ -165,7 +165,7 @@ export default function Perfil() {
 
                   //Hacemos el update
                   const { error: errorUpdate } = await supabase
-                    .from("Users")
+                    .from("Usuarios")
                     .update({
                       Apodo: nickname,
                       Nombre: firstName,

@@ -8,7 +8,7 @@ export default function Perfil() {
   const router = useRouter();
   const navigation = useNavigation();
   const { idUser } = useLocalSearchParams();
-  
+
   const userId = Number(idUser); // Para volverlo un numero y no un string
 
   const [nickname, setNickname] = useState("");
@@ -105,7 +105,7 @@ export default function Perfil() {
               onPress={() =>
                 router.push({
                   pathname: "/extras/CambioContrasena",
-                  params: { idUser: String(userId) }, // ✅ Lo pasamos como string
+                  params: { idUser: String(userId) }, // Lo pasamos como string
                 })
               }
             >

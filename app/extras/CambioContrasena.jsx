@@ -10,7 +10,7 @@ export default function CambioContrasena() {
   const router = useRouter();
   const navigation = useNavigation();
   const { idUser } = useLocalSearchParams();
-  const userId = Number(idUser); // ✅ Convertimos a número
+  const userId = Number(idUser); // Convertimos a número
 
   const [contrasenaActual, setContrasenaActual] = useState("");
   const [nuevaContrasena, setNuevaContrasena] = useState("");

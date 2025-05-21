@@ -32,7 +32,7 @@ export default function CambioContrasena() {
       if (!apodo) return;
 
       const { data, error } = await supabase
-        .from("Users")
+        .from("Usuarios")
         .select("Password")
         .eq("Apodo", apodo)
         .single();
@@ -155,7 +155,7 @@ export default function CambioContrasena() {
               
                 //Obtenemos la contraseña real desde la base de datos
                 const { data: usuario, error } = await supabase
-                  .from("Users")
+                  .from("Usuarios")
                   .select("idUser, Password")
                   .eq("Apodo", apodo)
                   .single();
@@ -179,7 +179,7 @@ export default function CambioContrasena() {
               
                 //Hacemos el update
                 const { error: errorUpdate } = await supabase
-                  .from("Users")
+                  .from("Usuarios")
                   .update({ Password: nuevaContrasena })
                   .eq("idUser", usuario.idUser);
               

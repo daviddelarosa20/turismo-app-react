@@ -1,15 +1,17 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, TextInput, TouchableOpacity, Image, Text } from "react-native";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter, useNavigation, useLocalSearchParams } from "expo-router";
 import { useLayoutEffect, useState, useEffect } from "react";
 import { supabase } from "../../supabase/supabase";
 
 export default function Perfil() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { idUser } = useLocalSearchParams();
+  
+  const userId = Number(idUser); // Para volverlo un numero y no un string
 
   const [nickname, setNickname] = useState("");
-  const [apodoOriginal, setApodoOriginal] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,14 +30,13 @@ export default function Perfil() {
       const { data, error } = await supabase
         .from("Usuarios")
         .select("idUser, Nombre, Apellido, Email, Telefono, Apodo")
-        .eq("Apodo", "HuGol") // apodo fijo inicial (puede ser de sesión luego)
+        .eq("idUser", userId)
         .single();
 
       if (error) {
         console.error("Error al obtener datos:", error.message);
       } else if (data) {
         setNickname(data.Apodo);
-        setApodoOriginal(data.Apodo);
         setFirstName(data.Nombre);
         setLastName(data.Apellido);
         setEmail(data.Email);
@@ -43,8 +44,8 @@ export default function Perfil() {
       }
     }
 
-    obtenerDatosUsuario();
-  }, []);
+    if (userId) obtenerDatosUsuario();
+  }, [userId]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -57,7 +58,6 @@ export default function Perfil() {
             />
           </View>
 
-          {/* Apodo editable */}
           <TextInput
             value={nickname}
             onChangeText={setNickname}
@@ -100,20 +100,18 @@ export default function Perfil() {
               className="border border-gray-300 rounded px-3 py-3 mb-8 w-96 self-center"
             />
 
-            {/* Botón de modificar contraseña */}
             <TouchableOpacity
               className="bg-blue-500 px-[75px] py-2 rounded mb-3 self-center"
               onPress={() =>
                 router.push({
                   pathname: "/extras/CambioContrasena",
-                  params: { apodo: nickname },
+                  params: { idUser: String(userId) }, // ✅ Lo pasamos como string
                 })
               }
             >
               <Text className="font-medium text-white text-sm">Modificar contraseña</Text>
             </TouchableOpacity>
 
-            {/* Botón guardar cambios */}
             <TouchableOpacity
               className="mt-1 bg-green-500 px-[88px] py-2 rounded mb-3 self-center"
               onPress={async () => {
@@ -122,69 +120,46 @@ export default function Perfil() {
                   return;
                 }
 
-                try {
-                  //Se hace la busqueda del usuario actual por su apodo :D
-                  const { data: usuarioActual, error: errorUsuario } = await supabase
-                    .from("Usuarios")
-                    .select("idUser")
-                    .eq("Apodo", apodoOriginal)
-                    .single();
+                const { data: apodoRepetido } = await supabase
+                  .from("Usuarios")
+                  .select("idUser")
+                  .eq("Apodo", nickname)
+                  .neq("idUser", userId)
+                  .maybeSingle();
 
-                  if (errorUsuario || !usuarioActual) {
-                    alert("No se pudo identificar al usuario.");
-                    return;
-                  }
+                if (apodoRepetido) {
+                  alert("Ese apodo ya está en uso por otro usuario.");
+                  return;
+                }
 
-                  const idActual = usuarioActual.idUser;
+                const { data: emailRepetido } = await supabase
+                  .from("Usuarios")
+                  .select("idUser")
+                  .eq("Email", email)
+                  .neq("idUser", userId)
+                  .maybeSingle();
 
-                  //Validamos el apado duplicado
-                  const { data: apodoRepetido } = await supabase
-                    .from("Usuarios")
-                    .select("idUser")
-                    .eq("Apodo", nickname)
-                    .neq("idUser", idActual)
-                    .maybeSingle();
+                if (emailRepetido) {
+                  alert("Ese correo ya está registrado por otro usuario.");
+                  return;
+                }
 
-                  if (apodoRepetido) {
-                    alert("Ese apodo ya está en uso por otro usuario.");
-                    return;
-                  }
+                const { error: errorUpdate } = await supabase
+                  .from("Usuarios")
+                  .update({
+                    Apodo: nickname,
+                    Nombre: firstName,
+                    Apellido: lastName,
+                    Email: email,
+                    Telefono: phone || null,
+                  })
+                  .eq("idUser", userId);
 
-                  //Validamos el correo duplicado
-                  const { data: emailRepetido } = await supabase
-                    .from("Usuarios")
-                    .select("idUser")
-                    .eq("Email", email)
-                    .neq("idUser", idActual)
-                    .maybeSingle();
-
-                  if (emailRepetido) {
-                    alert("Ese correo ya está registrado por otro usuario.");
-                    return;
-                  }
-
-                  //Hacemos el update
-                  const { error: errorUpdate } = await supabase
-                    .from("Usuarios")
-                    .update({
-                      Apodo: nickname,
-                      Nombre: firstName,
-                      Apellido: lastName,
-                      Email: email,
-                      Telefono: phone || null,
-                    })
-                    .eq("idUser", idActual);
-
-                  if (errorUpdate) {
-                    alert("Error al guardar cambios.");
-                    console.error(errorUpdate);
-                  } else {
-                    alert("Cambios guardados exitosamente.");
-                    setApodoOriginal(nickname);
-                  }
-                } catch (err) {
-                  console.error("Error inesperado:", err);
-                  alert("Ocurrió un error inesperado.");
+                if (errorUpdate) {
+                  alert("Error al guardar cambios.");
+                  console.error(errorUpdate);
+                } else {
+                  alert("Cambios guardados exitosamente.");
                 }
               }}
             >
@@ -194,7 +169,7 @@ export default function Perfil() {
             <TouchableOpacity
               className="mt-1 bg-red-500 px-[101px] py-2 rounded self-center mb-10"
               onPress={() => {
-                //Logica para el cierre de sesion cuando se tenga el login
+                router.replace("/login/login");
               }}
             >
               <Text className="text-white font-medium">Cerrar sesión</Text>

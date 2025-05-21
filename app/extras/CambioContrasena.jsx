@@ -9,11 +9,13 @@ import { Ionicons } from "@expo/vector-icons";
 export default function CambioContrasena() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { apodo } = useLocalSearchParams();
+  const { idUser } = useLocalSearchParams();
+  const userId = Number(idUser); // ✅ Convertimos a número
 
   const [contrasenaActual, setContrasenaActual] = useState("");
   const [nuevaContrasena, setNuevaContrasena] = useState("");
   const [confirmarContrasena, setConfirmarContrasena] = useState("");
+  const [passwordReal, setPasswordReal] = useState("");
 
   const [mostrarContrasenaActual, setMostrarContrasenaActual] = useState(false);
   const [mostrarNuevaContrasena, setMostrarNuevaContrasena] = useState(false);
@@ -29,23 +31,21 @@ export default function CambioContrasena() {
 
   useEffect(() => {
     async function obtenerContrasena() {
-      if (!apodo) return;
-
       const { data, error } = await supabase
         .from("Usuarios")
         .select("Password")
-        .eq("Apodo", apodo)
+        .eq("idUser", userId)
         .single();
 
       if (error) {
         console.error("Error al obtener la contraseña:", error.message);
       } else if (data) {
-        setContrasenaActual(data.Password);
+        setPasswordReal(data.Password);
       }
     }
 
-    obtenerContrasena();
-  }, [apodo]);
+    if (userId) obtenerContrasena();
+  }, [userId]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -53,16 +53,9 @@ export default function CambioContrasena() {
       <View className="items-center mt-6 relative">
         <View className="px-4 py-6 flex-1">
           <Text className="text-xl font-bold mb-6 w-96 self-center">Cambiar la contraseña</Text>
-          <Text className="text-gray-600 mb-10 w-96 self-center">
-            Una contraseña segura contribuye a evitar el acceso no autorizado a la cuenta de correo electrónico.
-          </Text>
-          <Text className="text-sm text-gray-500 mb-4 w-96 self-center">
-            8 caracteres como mínimo...
-          </Text>
 
           <View className="items-center mt-4 relative">
             <View className="mt-1 w-96 self-center">
-              {/*Contraseña actual*/}
               <Text className="mb-1 font-medium">Contraseña actual:</Text>
               <View className="relative mb-4">
                 <TextInput
@@ -83,8 +76,7 @@ export default function CambioContrasena() {
                   />
                 </TouchableOpacity>
               </View>
-              
-              {/*Nueva contraseña*/}
+
               <Text className="mb-1 font-medium">Nueva contraseña:</Text>
               <View className="relative mb-4">
                 <TextInput
@@ -106,7 +98,6 @@ export default function CambioContrasena() {
                 </TouchableOpacity>
               </View>
 
-              {/*Confirmar contraseña*/}
               <Text className="mb-1 font-medium">Confirmar contraseña:</Text>
               <View className="relative mb-10">
                 <TextInput
@@ -133,9 +124,7 @@ export default function CambioContrasena() {
           <View className="flex-row justify-between">
             <TouchableOpacity
               className="flex-1 mr-5 bg-red-500 rounded py-2 items-center"
-              onPress={() => {
-                router.back();
-              }}
+              onPress={() => router.back()}
             >
               <Text className="font-medium text-white">Cancelar</Text>
             </TouchableOpacity>
@@ -147,42 +136,27 @@ export default function CambioContrasena() {
                   alert("Completa todos los campos.");
                   return;
                 }
-              
+
                 if (nuevaContrasena.length < 8) {
                   alert("La nueva contraseña debe tener al menos 8 caracteres.");
                   return;
                 }
-              
-                //Obtenemos la contraseña real desde la base de datos
-                const { data: usuario, error } = await supabase
-                  .from("Usuarios")
-                  .select("idUser, Password")
-                  .eq("Apodo", apodo)
-                  .single();
-              
-                if (error || !usuario) {
-                  alert("No se pudo verificar la contraseña actual.");
-                  return;
-                }
-              
-                //Verificamos que la contraseña actual ingresada coincida con la del pelao
-                if (contrasenaActual !== usuario.Password) {
+
+                if (contrasenaActual !== passwordReal) {
                   alert("La contraseña actual no es correcta.");
                   return;
                 }
-              
-                //Verificar que la contraseña nueva y la confirmación coincidan
+
                 if (nuevaContrasena !== confirmarContrasena) {
                   alert("La nueva contraseña y la confirmación no coinciden.");
                   return;
                 }
-              
-                //Hacemos el update
+
                 const { error: errorUpdate } = await supabase
                   .from("Usuarios")
                   .update({ Password: nuevaContrasena })
-                  .eq("idUser", usuario.idUser);
-              
+                  .eq("idUser", userId);
+
                 if (errorUpdate) {
                   console.error("Error al actualizar la contraseña:", errorUpdate);
                   alert("Ocurrió un error al actualizar la contraseña.");

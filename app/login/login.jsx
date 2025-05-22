@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { supabase } from "../../supabase/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -71,6 +72,20 @@ export default function LoginScreen() {
       } else if (data) {
         Alert.alert("Éxito", "¡Inicio de sesión exitoso!");
         console.log("Usuario autenticado:", data);
+
+        try {
+          await AsyncStorage.setItem(
+            "userSession",
+            JSON.stringify({
+              idUser: data.idUser,
+              email: data.Email,
+              loginTime: new Date().toISOString(),
+            }),
+          );
+        } catch (storageError) {
+          console.error("Error al guardar sesión:", storageError);
+        }
+
         router.replace("/Home");
       } else {
         Alert.alert(

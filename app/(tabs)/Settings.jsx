@@ -46,7 +46,7 @@ export default function SettingsScreen() {
             <SettingsRow
               icon="account-outline"
               text="Cuenta"
-              onPress={() => navigateTo("/settings/account")}
+              onPress={() => navigateTo("/extras/Perfil")}
             />
             <View className="border-b border-[#3a3f44] my-2" />
             <SettingsRow

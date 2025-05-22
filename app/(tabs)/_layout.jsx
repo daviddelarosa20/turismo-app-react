@@ -1,7 +1,6 @@
 import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Feather from "@expo/vector-icons/Feather";
-import { View, TouchableOpacity, Platform } from "react-native"; // Removed duplicate TouchableOpacity
+import { View, TouchableOpacity, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 const router = useRouter();
@@ -14,9 +13,6 @@ const Colors = {
 };
 
 export default function Layout() {
-  // This is your single default export
-  const router = useRouter();
-
   return (
     <>
       <StatusBar style="light" />
@@ -29,13 +25,14 @@ export default function Layout() {
             fontWeight: "bold",
             fontSize: 28,
           },
-          headerLeft: () => (
-            <View className="items-center justify-center ml-3">
-              <TouchableOpacity onPress={() => alert("Menu")}>
-                <Feather name="menu" size={24} color={Colors.veryLightBeige} />
-              </TouchableOpacity>
-            </View>
-          ),
+          // 👇 Eliminado el menú hamburguesa
+          // headerLeft: () => (
+          //   <View className="items-center justify-center ml-3">
+          //     <TouchableOpacity onPress={() => alert("Menu")}>
+          //       <Feather name="menu" size={24} color={Colors.veryLightBeige} />
+          //     </TouchableOpacity>
+          //   </View>
+          // ),
           headerRight: () => (
             <View className="items-center justify-center mr-3 rounded-full bg-mediumBlue p-2">
               <TouchableOpacity

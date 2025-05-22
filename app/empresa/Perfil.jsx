@@ -1,15 +1,25 @@
-import { View, Text, ScrollView, Image, ActivityIndicator, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
 import { useEffect, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
 import { supabase } from "../../supabase/supabase";
 import { LineChart, BarChart } from "react-native-chart-kit";
+
 import moment from "moment"; // npm install moment
-import 'moment/locale/es';
+import "moment/locale/es";
 
 export default function PerfilEmpresa() {
   const [empresa, setEmpresa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [estadisticasPorMes, setEstadisticasPorMes] = useState({});
   const [chartData, setChartData] = useState(null);
+  const { idEmpresa } = useLocalSearchParams();
 
   useEffect(() => {
     async function fetchEmpresa() {
@@ -18,7 +28,7 @@ export default function PerfilEmpresa() {
       const { data, error } = await supabase
         .from("Empresas")
         .select("*")
-        .eq("idEmpresa", 1)//id empresa
+        .eq("idEmpresa", idEmpresa) //id empresa
         .single();
 
       if (error) {
@@ -43,7 +53,7 @@ export default function PerfilEmpresa() {
       }
 
       const agrupadas = {};
-      data.forEach(item => {
+      data.forEach((item) => {
         const mes = moment(item.fecha).format("YYYY-MM");
         if (!agrupadas[mes]) {
           agrupadas[mes] = { visitas: 0, clientes: 0 };
@@ -58,29 +68,32 @@ export default function PerfilEmpresa() {
       const mesesOriginales = Object.keys(agrupadas).sort();
 
       // Creamos etiquetas con el nombre del mes en español
-      const labels = mesesOriginales.map(mes => moment(mes, "YYYY-MM").locale('es').format("MMMM"));
+      const labels = mesesOriginales.map((mes) =>
+        moment(mes, "YYYY-MM").locale("es").format("MMMM"),
+      );
 
       // Obtenemos los datos usando la llave original (YYYY-MM)
-const visitasData = mesesOriginales.map(mes => agrupadas[mes].visitas);
-const clientesData = mesesOriginales.map(mes => agrupadas[mes].clientes);
+      const visitasData = mesesOriginales.map((mes) => agrupadas[mes].visitas);
+      const clientesData = mesesOriginales.map(
+        (mes) => agrupadas[mes].clientes,
+      );
 
-setChartData({
-  labels,
-  datasets: [
-    {
-      data: visitasData,
-      color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
-      strokeWidth: 2,
-    },
-    {
-      data: clientesData,
-      color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
-      strokeWidth: 2,
-    },
-  ],
-  legend: ["Visitas", "Clientes Atraídos"],
-});
-
+      setChartData({
+        labels,
+        datasets: [
+          {
+            data: visitasData,
+            color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
+            strokeWidth: 2,
+          },
+          {
+            data: clientesData,
+            color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+            strokeWidth: 2,
+          },
+        ],
+        legend: ["Visitas", "Clientes Atraídos"],
+      });
     }
 
     fetchEmpresa();
@@ -98,7 +111,9 @@ setChartData({
   if (!empresa) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-100">
-        <Text className="text-red-600">No se encontró información de la empresa</Text>
+        <Text className="text-red-600">
+          No se encontró información de la empresa
+        </Text>
       </View>
     );
   }
@@ -124,8 +139,12 @@ setChartData({
       <View className="bg-white rounded-2xl p-4 shadow mb-4">
         <Text className="text-lg font-bold mb-2">Datos generales</Text>
         <Text className="text-gray-700">Dirección:</Text>
-        <Text>{empresa.Calle} #{empresa.NumExt}, {empresa.Colonia}</Text>
-        <Text>{empresa.CodigoPostal}, {empresa.Ciudad}</Text>
+        <Text>
+          {empresa.Calle} #{empresa.NumExt}, {empresa.Colonia}
+        </Text>
+        <Text>
+          {empresa.CodigoPostal}, {empresa.Ciudad}
+        </Text>
         <Text className="mt-2 text-gray-700">Descripción:</Text>
         <Text>{empresa.Descripcion}</Text>
       </View>
@@ -146,89 +165,90 @@ setChartData({
       </View>
 
       {chartData && (
-  <View className="bg-white rounded-2xl p-4 shadow mb-4">
-    <Text className="text-lg font-bold mb-2">Visitas por mes</Text>
-    <BarChart
-      data={{
-        labels: chartData.labels,
-        datasets: [
-          {
-            data: chartData.datasets[0].data, // visitas
-          },
-        ],
-      }}
-      width={screenWidth - 48}
-      height={220}
-      yAxisLabel=""
-      fromZero={true}        // Inicia desde 0
-      yAxisInterval={1}      // Intervalos del eje Y
-      formatYLabel={value => {
-        const num = Number(value);
-        if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-        return value;
-      }}
-      chartConfig={{
-        backgroundColor: "#fff",
-        backgroundGradientFrom: "#fff",
-        backgroundGradientTo: "#fff",
-        decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-        style: {
-          borderRadius: 16,
-        },
-      }}
-      verticalLabelRotation={30}
-      style={{
-        borderRadius: 16,
-        marginBottom: 16,
-      }}
-    />
-  </View>
-)}
+        <View className="bg-white rounded-2xl p-4 shadow mb-4">
+          <Text className="text-lg font-bold mb-2">Visitas por mes</Text>
+          <BarChart
+            data={{
+              labels: chartData.labels,
+              datasets: [
+                {
+                  data: chartData.datasets[0].data, // visitas
+                },
+              ],
+            }}
+            width={screenWidth - 48}
+            height={220}
+            yAxisLabel=""
+            fromZero={true} // Inicia desde 0
+            yAxisInterval={1} // Intervalos del eje Y
+            formatYLabel={(value) => {
+              const num = Number(value);
+              if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+              return value;
+            }}
+            chartConfig={{
+              backgroundColor: "#fff",
+              backgroundGradientFrom: "#fff",
+              backgroundGradientTo: "#fff",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+            }}
+            verticalLabelRotation={30}
+            style={{
+              borderRadius: 16,
+              marginBottom: 16,
+            }}
+          />
+        </View>
+      )}
 
-{chartData && (
-  <View className="bg-white rounded-2xl p-4 shadow mb-4">
-    <Text className="text-lg font-bold mb-2">Clientes atraídos por mes</Text>
-    <BarChart
-      data={{
-        labels: chartData.labels,
-        datasets: [
-          {
-            data: chartData.datasets[1].data, // clientes atraídos
-          },
-        ],
-      }}
-      width={screenWidth - 48}
-      height={220}
-      yAxisLabel=""
-      fromZero={true}
-      yAxisInterval={1}
-      formatYLabel={value => {
-        const num = Number(value);
-        if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-        return value;
-      }}
-      chartConfig={{
-        backgroundColor: "#fff",
-        backgroundGradientFrom: "#fff",
-        backgroundGradientTo: "#fff",
-        decimalPlaces: 0,
-        color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-        style: {
-          borderRadius: 16,
-        },
-      }}
-      verticalLabelRotation={30}
-      style={{
-        borderRadius: 16,
-        marginBottom: 16,
-      }}
-    />
-  </View>
-)}
-
+      {chartData && (
+        <View className="bg-white rounded-2xl p-4 shadow mb-4">
+          <Text className="text-lg font-bold mb-2">
+            Clientes atraídos por mes
+          </Text>
+          <BarChart
+            data={{
+              labels: chartData.labels,
+              datasets: [
+                {
+                  data: chartData.datasets[1].data, // clientes atraídos
+                },
+              ],
+            }}
+            width={screenWidth - 48}
+            height={220}
+            yAxisLabel=""
+            fromZero={true}
+            yAxisInterval={1}
+            formatYLabel={(value) => {
+              const num = Number(value);
+              if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+              return value;
+            }}
+            chartConfig={{
+              backgroundColor: "#fff",
+              backgroundGradientFrom: "#fff",
+              backgroundGradientTo: "#fff",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+            }}
+            verticalLabelRotation={30}
+            style={{
+              borderRadius: 16,
+              marginBottom: 16,
+            }}
+          />
+        </View>
+      )}
 
       <View className="bg-white rounded-2xl p-4 shadow mb-8">
         <Text className="text-lg font-bold mb-2">Comentarios recientes</Text>

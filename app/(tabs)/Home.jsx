@@ -5,6 +5,7 @@ import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import Card from "../../components/Card";
+import { useLocalSearchParams } from "expo-router";
 
 const Colors = {
   darkBlue: "#1a1e22",
@@ -26,6 +27,7 @@ export default function Home() {
   const [categorias, setCategorias] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const router = useRouter();
+  const { idUser, email } = useLocalSearchParams();
 
   const getCategorias = async () => {
     let { data: Categorias, error } = await supabase
@@ -59,9 +61,12 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (idUser) {
+      console.log("ID del usuario logueado:", idUser);
+    }
     getCategorias();
     getEmpresas();
-  }, []);
+  }, [idUser]);
 
   return (
     <SafeAreaView

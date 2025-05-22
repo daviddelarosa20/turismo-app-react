@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { supabase } from "../../supabase/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -45,42 +46,77 @@ export default function LoginScreen() {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("Usuarios")
         .select("idUser, Email")
         .eq("Email", email)
         .eq("Password", password)
         .single();
 
-      if (error) {
-        if (error.code === "PGRST116") {
+      if (userError && userError.code !== "PGRST116") {
+        Alert.alert(
+          "Error",
+          "Ocurrió un error al verificar las credenciales de usuario: " +
+            userError.message,
+        );
+        console.error(
+          "Error al buscar usuario en la tabla 'Usuarios':",
+          userError,
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (userData) {
+        Alert.alert("Éxito", "¡Inicio de sesión exitoso!");
+        console.log("Usuario autenticado:", userData);
+
+        try {
+          await AsyncStorage.setItem(
+            "userSession",
+            JSON.stringify({
+              idUser: userData.idUser,
+              email: userData.Email,
+              loginTime: new Date().toISOString(),
+            }),
+          );
+        } catch (storageError) {
+          console.error("Error al guardar sesión:", storageError);
+        }
+
+        router.replace("/Home");
+      } else {
+        const { data: adminData, error: adminError } = await supabase
+          .from("UserAdmin")
+          .select("idEmpresa, Email")
+          .eq("Email", email)
+          .eq("Password", password)
+          .single();
+
+        if (adminData) {
+          Alert.alert("Éxito", "¡Inicio de sesión como administrador!");
+          console.log("Administrador autenticado:", adminData);
+          router.replace(`/empresa/Perfil?idEmpresa=${adminData.idEmpresa}`);
+        } else if (adminError && adminError.code !== "PGRST116") {
+          Alert.alert(
+            "Error",
+            "Ocurrió un error al verificar las credenciales de administrador: " +
+              adminError.message,
+          );
+          console.error(
+            "Error al buscar usuario en la tabla 'UserAdmin':",
+            adminError,
+          );
+        } else {
           Alert.alert(
             "Error de inicio de sesión",
             "Correo electrónico o contraseña incorrectos.",
           );
-        } else {
-          Alert.alert(
-            "Error",
-            "Ocurrió un error al verificar las credenciales: " + error.message,
-          );
-          console.error(
-            "Error al buscar usuario en la tabla 'Usuarios':",
-            error,
-          );
         }
-      } else if (data) {
-        Alert.alert("Éxito", "¡Inicio de sesión exitoso!");
-        console.log("Usuario autenticado:", data);
-        router.replace("/Home");
-      } else {
-        Alert.alert(
-          "Error de inicio de sesión",
-          "Correo electrónico o contraseña incorrectos.",
-        );
       }
-    } catch (error) {
+    } catch (unexpectedError) {
       Alert.alert("Error", "Ocurrió un error inesperado al iniciar sesión.");
-      console.error("Error inesperado en handleLogin:", error);
+      console.error("Error inesperado en handleLogin:", unexpectedError);
     } finally {
       setLoading(false);
     }

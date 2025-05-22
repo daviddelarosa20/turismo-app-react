@@ -1,9 +1,10 @@
 import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
 import { View, TouchableOpacity, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
-
-const router = useRouter();
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState, useEffect } from "react";
 
 const Colors = {
   darkBlue: "#292d32",
@@ -13,6 +14,24 @@ const Colors = {
 };
 
 export default function Layout() {
+  const router = useRouter();
+  const [userSession, setUserSession] = useState(null);
+
+  useEffect(() => {
+    const getUserSession = async () => {
+      try {
+        const session = await AsyncStorage.getItem("userSession");
+        if (session) {
+          const userData = JSON.parse(session);
+          setUserSession(userData);
+        }
+      } catch (error) {
+        console.error("Error al obtener sesión:", error);
+      }
+    };
+
+    getUserSession();
+  }, []);
   return (
     <>
       <StatusBar style="light" />
@@ -37,7 +56,14 @@ export default function Layout() {
             <View className="items-center justify-center mr-3 rounded-full bg-mediumBlue p-2">
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/extras/Perfil");
+                  if (userSession && userSession.idUser) {
+                    router.push({
+                      pathname: "/extras/Perfil",
+                      params: { idUser: String(userSession.idUser) },
+                    });
+                  } else {
+                    alert("No se pudo obtener la información del usuario");
+                  }
                 }}
               >
                 <AntDesign

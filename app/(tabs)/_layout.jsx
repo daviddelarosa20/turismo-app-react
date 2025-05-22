@@ -32,7 +32,6 @@ export default function Layout() {
 
     getUserSession();
   }, []);
-
   return (
     <>
       <StatusBar style="light" />
@@ -45,13 +44,14 @@ export default function Layout() {
             fontWeight: "bold",
             fontSize: 28,
           },
-          headerLeft: () => (
-            <View className="items-center justify-center ml-3">
-              <TouchableOpacity onPress={() => alert("Menu")}>
-                <Feather name="menu" size={24} color={Colors.veryLightBeige} />
-              </TouchableOpacity>
-            </View>
-          ),
+          // 👇 Eliminado el menú hamburguesa
+          // headerLeft: () => (
+          //   <View className="items-center justify-center ml-3">
+          //     <TouchableOpacity onPress={() => alert("Menu")}>
+          //       <Feather name="menu" size={24} color={Colors.veryLightBeige} />
+          //     </TouchableOpacity>
+          //   </View>
+          // ),
           headerRight: () => (
             <View className="items-center justify-center mr-3 rounded-full bg-mediumBlue p-2">
               <TouchableOpacity

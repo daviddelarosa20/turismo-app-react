@@ -60,7 +60,7 @@ export default function Home() {
         <View className="px-4 py-2">
           <TouchableOpacity
             className="bg-blue-500 rounded-lg px-4 py-2 mb-4"
-            onPress={() => router.push("/Estadisticas")}
+            onPress={() => router.push("/extras/Estadisticas")}
           >
             <Text className="text-white font-medium text-center">Ir a Estadísticas</Text>
          </TouchableOpacity>

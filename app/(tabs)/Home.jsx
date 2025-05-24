@@ -33,7 +33,7 @@ export default function Home() {
     let { data: Categorias, error } = await supabase
       .from("Categorias")
       .select("Nombre")
-      .limit(5)
+      .limit(3)
       .order("Nombre", { ascending: true });
     if (error) {
       console.log(error);

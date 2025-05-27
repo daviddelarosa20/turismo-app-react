@@ -28,13 +28,6 @@ export default function PlanBoletaje() {
       headerStyle: { backgroundColor: "#282d33" },
       headerTitleAlign: "center",
       headerTintColor: "#F5EFE7",
-      headerRight: () => (
-        <View className="items-center justify-center mr-3 rounded-full bg-slate-800 p-2">
-          <TouchableOpacity onPress={() => alert("Perfil")}>
-            <AntDesign name="user" size={24} color="#F5EFE7" />
-          </TouchableOpacity>
-        </View>
-      ),
     });
   }, [navigation, title]);
 

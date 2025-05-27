@@ -29,13 +29,6 @@ export default function PlanBasico() {
       headerStyle: { backgroundColor: "#282d33" },
       headerTintColor: "#F5EFE7",
       headerTitleAlign: "center",
-      headerRight: () => (
-        <View className="mr-3 p-2 rounded-full bg-slate-800">
-          <TouchableOpacity onPress={() => alert("Perfil")}>
-            <AntDesign name="user" size={24} color="#F5EFE7" />
-          </TouchableOpacity>
-        </View>
-      ),
     });
   }, [navigation, title]);
 
@@ -148,7 +141,7 @@ export default function PlanBasico() {
         </View>
 
         <Text className="font-bold mt-6 mb-2 text-center text-veryLightBeige-500 text-xl">
-          Redes Sociales
+          Redes sociales
         </Text>
         <View className="flex-row justify-around w-full mb-8">
           {redes.map((red, idx) => (

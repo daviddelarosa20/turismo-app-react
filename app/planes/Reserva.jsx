@@ -261,7 +261,7 @@ export default function Reserva() {
         onPress={guardarReserva}
       >
         <Text className="text-darkBlue-900 font-bold text-lg">
-          Confirmar Reserva
+          Confirmar reserva
         </Text>
       </TouchableOpacity>
     </ScrollView>

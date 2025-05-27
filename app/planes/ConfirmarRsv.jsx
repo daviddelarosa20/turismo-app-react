@@ -21,7 +21,7 @@ export default function ConfirmarRsv() {
     <View className="flex-1 bg-darkBlue-900 p-6 items-center justify-center">
       <Text className="text-right text-gray-500 mb-5 w-full">2 de 2</Text>
       <Text className="text-3xl font-bold text-center mb-10 text-veryLightBeige-500">
-        ¡Reserva Confirmada!
+        ¡Reserva confirmada!
       </Text>
 
       <View className="w-full bg-slate-50 p-6 rounded-xl mb-8">

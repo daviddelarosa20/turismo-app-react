@@ -81,7 +81,7 @@ export default function ConfirmacionB() {
             <View className="flex-row justify-between items-center text-sm">
               <View>
                 <Text className="font-medium text-lightBeige-400">
-                  Fecha y Hora
+                  Fecha y hora
                 </Text>
                 <Text className="text-gray-800">
                   {Fecha} a las {Hora}
@@ -121,7 +121,7 @@ export default function ConfirmacionB() {
                   </Text>
                 </View>
                 <View className="flex-row justify-between items-center text-sm">
-                  <Text className="text-gray-800">Fecha de Vencimiento</Text>
+                  <Text className="text-gray-800">Fecha de vencimiento</Text>
                   <Text className="font-medium text-veryLightBeige-500">
                     {fechaVencimiento}
                   </Text>
@@ -281,7 +281,7 @@ export default function ConfirmacionB() {
             }}
           >
             <Text className="text-white font-medium text-center text-lg">
-              Confirmar Compra
+              Confirmar compra
             </Text>
           </TouchableOpacity>
         </View>

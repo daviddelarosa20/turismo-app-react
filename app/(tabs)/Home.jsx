@@ -1,6 +1,6 @@
 import { Text, View, ScrollView, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../supabase/supabase";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
@@ -27,23 +27,31 @@ export default function Home() {
   const [categorias, setCategorias] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const router = useRouter();
-  const { idUser, email } = useLocalSearchParams();
+  const { idUser, email, selectedCategoryIdFromCategories } =
+    useLocalSearchParams();
+
+  // El estado `selectedCategoryId` ahora puede ser inicializado con el parámetro
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    selectedCategoryIdFromCategories
+      ? parseInt(selectedCategoryIdFromCategories)
+      : null,
+  );
 
   const getCategorias = async () => {
     let { data: Categorias, error } = await supabase
       .from("Categorias")
-      .select("Nombre")
-      .limit(5)
+      .select("idCategoria, Nombre")
+      .limit(3)
       .order("Nombre", { ascending: true });
     if (error) {
-      console.log(error);
+      console.log("Error al obtener categorías:", error);
     } else {
       setCategorias(Categorias);
     }
   };
 
-  const getEmpresas = async () => {
-    let { data: Empresas, error } = await supabase.from("Empresas").select(`
+  const getEmpresas = useCallback(async () => {
+    let query = supabase.from("Empresas").select(`
       Nombre,
       Descripcion,
       Portada,
@@ -51,22 +59,54 @@ export default function Home() {
       Calle,
       NumExt,
       Colonia,
-      CodigoPost
+      CodigoPost,
+      idCategoria
     `);
+
+    if (selectedCategoryId) {
+      query = query.eq("idCategoria", selectedCategoryId);
+    }
+
+    let { data: Empresas, error } = await query;
+
     if (error) {
-      console.log(error);
+      console.log("Error al obtener empresas:", error);
     } else {
       setEmpresas(Empresas);
     }
-  };
+  }, [selectedCategoryId]);
 
   useEffect(() => {
     if (idUser) {
       console.log("ID del usuario logueado:", idUser);
     }
     getCategorias();
-    getEmpresas();
+    // getEmpresas se llamará automáticamente cuando selectedCategoryId cambie
+    // debido a su inclusión en el useEffect de abajo
   }, [idUser]);
+
+  // Este useEffect se encargará de llamar a getEmpresas cuando selectedCategoryId cambie
+  // (ya sea por un clic en la barra de categorías o por el parámetro de navegación).
+  useEffect(() => {
+    getEmpresas();
+  }, [selectedCategoryId, getEmpresas]); // Dependencia: re-ejecutar cuando selectedCategoryId cambie
+
+  // Sincroniza el estado selectedCategoryId con el parámetro de navegación
+  // Esto es importante si el usuario navega a Home con un filtro y luego cambia de filtro manualmente.
+  useEffect(() => {
+    if (
+      selectedCategoryIdFromCategories &&
+      parseInt(selectedCategoryIdFromCategories) !== selectedCategoryId
+    ) {
+      setSelectedCategoryId(parseInt(selectedCategoryIdFromCategories));
+    } else if (
+      !selectedCategoryIdFromCategories &&
+      selectedCategoryId !== null
+    ) {
+      // Si el parámetro ya no existe (ej. usuario llegó directamente a Home), limpia el filtro
+      setSelectedCategoryId(null);
+    }
+  }, [selectedCategoryIdFromCategories]);
 
   return (
     <SafeAreaView
@@ -84,6 +124,7 @@ export default function Home() {
             </Text>
             <TouchableOpacity
               onPress={() => {
+                // Al hacer clic en "Ver más", navega a la pantalla de Categorias
                 router.push("/extras/Categorias");
               }}
             >
@@ -102,18 +143,51 @@ export default function Home() {
             className="mb-8"
             contentContainerStyle={{ paddingRight: 16 }}
           >
+            {/* Opción para "Ver todas" las empresas */}
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  selectedCategoryId === null
+                    ? Colors.lightBeige
+                    : Colors.mediumBlue,
+              }}
+              className="rounded-xl px-4 py-2 mr-2"
+              onPress={() => setSelectedCategoryId(null)} // Limpia el filtro
+            >
+              <Text
+                style={{
+                  color:
+                    selectedCategoryId === null
+                      ? Colors.darkBlue
+                      : Colors.veryLightBeige,
+                }}
+                className="font-semibold"
+              >
+                Todas
+              </Text>
+            </TouchableOpacity>
+
             {categorias.length > 0 ? (
-              categorias.map((categoria, index) => (
+              categorias.map((categoria) => (
                 <TouchableOpacity
-                  style={{ backgroundColor: Colors.mediumBlue }}
+                  // Resalta la categoría seleccionada
+                  style={{
+                    backgroundColor:
+                      selectedCategoryId === categoria.idCategoria
+                        ? Colors.lightBeige
+                        : Colors.mediumBlue,
+                  }}
                   className="rounded-xl px-4 py-2 mr-2"
-                  key={index}
-                  onPress={() =>
-                    alert("Estas viendo la categoria " + categoria.Nombre)
-                  }
+                  key={categoria.idCategoria}
+                  onPress={() => setSelectedCategoryId(categoria.idCategoria)}
                 >
                   <Text
-                    style={{ color: Colors.veryLightBeige }}
+                    style={{
+                      color:
+                        selectedCategoryId === categoria.idCategoria
+                          ? Colors.darkBlue
+                          : Colors.veryLightBeige,
+                    }}
                     className="font-semibold"
                   >
                     {categoria.Nombre}
@@ -163,7 +237,7 @@ export default function Home() {
               ))
             ) : (
               <Text style={{ color: Colors.lightBeige }} className="mt-4">
-                Cargando recomendaciones...
+                No hay recomendaciones para esta categoría.
               </Text>
             )}
           </View>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
+
 const QuestionRow = ({ question, onPress, isExpanded }) => (
   <TouchableOpacity onPress={onPress} className="py-3">
     <View className="flex-row items-center justify-between">
@@ -34,13 +35,27 @@ const CategoryHeader = ({ title }) => (
 );
 
 export default function Helpcenter() {
-  useEffect(() => {
-    if (navigation && navigation.setOptions) {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }
-  }, [navigation]);
+  const router = useRouter();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Ayuda",
+      headerStyle: { backgroundColor: "#1a1e22" },
+      headerTintColor: "#FFF",
+      headerTitleStyle: {
+        fontWeight: "bold",
+        fontSize: 20,
+        marginLeft: 10,
+      },
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => router.back()} className="ml-2">
+          <Icon name="arrow-left" size={28} color="#FFF" />
+        </TouchableOpacity>
+      ),
+      headerTitleAlign: "left",
+    });
+  }, [navigation, router]);
 
   const categorias = [
     {
@@ -139,14 +154,7 @@ export default function Helpcenter() {
     <SafeAreaView className="flex-1 bg-[#1a1e22]">
       <StatusBar barStyle="light-content" backgroundColor="#1a1e22" />
 
-      <View className="w-full bg-[#1a1e22] p-4 flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Icon name="arrow-left" size={28} color="#FFF" />
-        </TouchableOpacity>
-        <Text className="text-white text-xl font-bold ml-4">Ayuda</Text>
-      </View>
-
-      <View className="px-6 flex-1">
+      <View className="px-6 py-3 flex-1">
         <TextInput
           placeholder="Buscar preguntas..."
           placeholderTextColor="#6b7280"

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../supabase/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -11,183 +11,283 @@ import {
   Modal,
   StyleSheet,
   Switch,
+  Alert,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const guardarBusquedaReciente = async (texto) => {
-  if (!texto.trim()) return;
+const Colors = {
+  darkBlue: "#1a1e22",
+  mediumBlue: "#282d33",
+  lightBeige: "#fff",
+  veryLightBeige: "#F5EFE7",
+};
+
+const imagenesEmpresas = {
+  "La Finca":
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images//RestauranteComida.jpg",
+  "SweetCake House":
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Postres.jpg",
+  "Teatro Ricardo Castro":
+    "https://jxcchonixqmpsnyefhfh.supabase.co/storage/v1/object/public/images/Teatro.jpg",
+};
+
+const guardarBusquedaReciente = async (texto, empresaData) => {
+  if (!texto || !texto.trim()) return;
 
   try {
     const jsonValue = await AsyncStorage.getItem("busquedasRecientes");
-    const busquedas = jsonValue != null ? JSON.parse(jsonValue) : [];
+    let busquedas = [];
+    if (jsonValue != null) {
+      try {
+        busquedas = JSON.parse(jsonValue);
+      } catch (parseError) {
+        console.error(
+          "Error al parsear búsquedas recientes de AsyncStorage:",
+          parseError,
+        );
+        busquedas = [];
+      }
+    }
 
-    const actualizadas = [texto, ...busquedas.filter((b) => b !== texto)];
+    const itemToSave =
+      empresaData && empresaData.Nombre
+        ? empresaData
+        : { Nombre: texto.trim() };
+
+    const actualizadas = [
+      itemToSave,
+      ...busquedas.filter(
+        (b) =>
+          b &&
+          b.Nombre &&
+          b.Nombre.toLowerCase() !== texto.trim().toLowerCase(),
+      ),
+    ];
 
     const limitadas = actualizadas.slice(0, 5);
 
     await AsyncStorage.setItem("busquedasRecientes", JSON.stringify(limitadas));
   } catch (e) {
-    console.error("Error guardando búsqueda reciente:", e);
+    console.error("Error guardando búsqueda reciente en AsyncStorage:", e);
   }
 };
 
 export default function Search() {
+  const router = useRouter();
+
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState([]);
-
-  useEffect(() => {
-    const fetchFilters = async () => {
-      const { data, error } = await supabase
-        .from("Categorias")
-        .select("idCategoria, Nombre");
-
-      if (error) {
-        console.error("Error fetching filters:", error);
-      } else {
-        const formatted = data.map((item) => ({
-          id: item.idCategoria,
-          name: item.Nombre,
-          active: false,
-        }));
-
-        // Agregar el filtro especial "Todas"
-        const allOption = { id: 0, name: "Todas", active: true, isAll: true }; // activo por defecto
-
-        setFilters([allOption, ...formatted]);
-      }
-    };
-
-    fetchFilters();
-  }, []);
-
-  const toggleFilter = (id) => {
-    setFilters((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, active: !f.active } : f)),
-    );
-  };
-
   const [filtersBackup, setFiltersBackup] = useState([]);
-  const openFilters = () => {
-    setFiltersBackup(JSON.parse(JSON.stringify(filters)));
-    setShowFilters(true);
-  };
 
   const [empresas, setEmpresas] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
-  const handleFilterClick = (id) => {
-    setFilters((prev) => {
-      const clickedFilter = prev.find((f) => f.id === id);
-      const isAll = clickedFilter.isAll;
+  const [busquedasRecientes, setBusquedasRecientes] = useState([]);
+  const [mostrarRecientes, setMostrarRecientes] = useState(true);
 
-      if (isAll) {
-        // Si se selecciona "Todas", desactivar los demás
-        return prev.map((f) => ({
+  // --- Funciones para la Lógica de Filtros ---
+
+  const fetchFilters = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("Categorias")
+      .select("idCategoria, Nombre");
+
+    if (error) {
+      console.error("Error fetching filters:", error);
+      Alert.alert("Error", "No se pudieron cargar las categorías de filtro.");
+    } else {
+      const formatted = data.map((item) => ({
+        id: item.idCategoria,
+        name: item.Nombre,
+        active: false,
+        isAll: false,
+      }));
+
+      const allOption = { id: null, name: "Todas", active: true, isAll: true };
+      setFilters([allOption, ...formatted]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFilters();
+  }, [fetchFilters]);
+
+  const handleFilterClick = useCallback((id) => {
+    setFilters((prevFilters) => {
+      if (!Array.isArray(prevFilters)) {
+        console.error("`prevFilters` no es un array:", prevFilters);
+        return [];
+      }
+
+      const clickedFilter = prevFilters.find((f) => f.id === id);
+
+      if (!clickedFilter) {
+        console.warn("Filtro clicado no encontrado:", id);
+        return prevFilters;
+      }
+
+      if (clickedFilter.isAll) {
+        return prevFilters.map((f) => ({
           ...f,
           active: f.isAll,
         }));
       } else {
-        const updated = prev.map((f) => {
+        const updatedFilters = prevFilters.map((f) => {
           if (f.isAll) return { ...f, active: false };
           if (f.id === id) return { ...f, active: !f.active };
           return f;
         });
 
-        const alMenosUnoActivo = updated.some((f) => f.active);
-
-        // Si ninguno queda activo, activar "Todas"
-        if (!alMenosUnoActivo) {
-          return prev.map((f) => ({
+        const alMenosUnaEspecificaActiva = updatedFilters.some(
+          (f) => !f.isAll && f.active,
+        );
+        if (!alMenosUnaEspecificaActiva) {
+          return updatedFilters.map((f) => ({
             ...f,
             active: f.isAll,
           }));
         }
-
-        return updated;
+        return updatedFilters;
       }
     });
+  }, []);
+
+  const openFilters = () => {
+    setFiltersBackup(JSON.parse(JSON.stringify(filters)));
+    setShowFilters(true);
   };
 
-  const [esBusquedaLocal, setEsBusquedaLocal] = useState(false);
+  const applyFilters = () => {
+    setShowFilters(false);
+    buscarEmpresas(searchText);
+  };
 
-  const buscarEmpresas = async (texto) => {
-    const textoMinuscula = texto.toLowerCase();
+  const cancelFilters = () => {
+    setFilters(filtersBackup); // Restaura el estado anterior
+    setShowFilters(false);
+  };
 
-    const filtrosActivos = filters.filter((f) => f.active);
+  // --- Funciones para la Búsqueda de Empresas ---
 
-    const todasActiva = filtrosActivos.some((f) => f.isAll);
+  const buscarEmpresas = useCallback(
+    async (texto) => {
+      const filtrosActivos = filters.filter((f) => f.active);
+      const todasActiva = filtrosActivos.some((f) => f.isAll);
+      let query = supabase.from("Empresas").select(`
+      idEmpresa,
+      Nombre,
+      Descripcion,
+      RutaDestino,
+      Calle,
+      NumExt,
+      NumInt,
+      Colonia,
+      CodigoPost,
+      Portada,
+      idCategoria
+    `); // Incluye todos los campos necesarios
 
-    const coincidenciasLocales = busquedasRecientes.filter((b) =>
-      b.toLowerCase().includes(textoMinuscula),
-    );
-
-    let coincidenciasRemotas = [];
-
-    if (todasActiva) {
-      // Buscar sin filtrar por categoría
-      const { data, error } = await supabase
-        .from("Empresas")
-        .select("Nombre")
-        .ilike("Nombre", `%${texto}%`);
-
-      if (!error && data) {
-        coincidenciasRemotas = data.map((empresa) => empresa.Nombre);
+      if (texto && texto.trim() !== "") {
+        query = query.ilike("Nombre", `%${texto.trim()}%`);
       }
-    } else {
-      // Obtener IDs de filtros activos normales
-      const categoriasActivas = filtrosActivos.map((f) => f.id);
 
-      if (categoriasActivas.length > 0) {
-        const { data, error } = await supabase
-          .from("Empresas")
-          .select("Nombre")
-          .ilike("Nombre", `%${texto}%`)
-          .in("idCategoria", categoriasActivas);
-
-        if (!error && data) {
-          coincidenciasRemotas = data.map((empresa) => empresa.Nombre);
+      if (!todasActiva) {
+        const categoriasActivasIds = filtrosActivos.map((f) => f.id);
+        if (categoriasActivasIds.length > 0) {
+          query = query.in("idCategoria", categoriasActivasIds);
+        } else {
+          setEmpresas([]);
+          return;
         }
       }
-    }
 
-    // Unificar resultados y eliminar duplicados
-    const nombresUnicos = [];
-    const lowerSet = new Set();
+      const { data, error } = await query;
 
-    [...coincidenciasLocales, ...coincidenciasRemotas].forEach((nombre) => {
-      const key = nombre.trim().toLowerCase();
-      if (!lowerSet.has(key)) {
-        lowerSet.add(key);
-        nombresUnicos.push(nombre);
+      if (error) {
+        console.error("Error al buscar empresas:", error);
+        Alert.alert(
+          "Error",
+          "No se pudieron obtener los resultados de la búsqueda.",
+        );
+        setEmpresas([]);
+      } else {
+        const empresasUnicas = [];
+        const nombresVistos = new Set();
+        data.forEach((emp) => {
+          if (emp && emp.Nombre) {
+            const lowerCaseName = emp.Nombre.trim().toLowerCase();
+            if (!nombresVistos.has(lowerCaseName)) {
+              nombresVistos.add(lowerCaseName);
+              empresasUnicas.push(emp);
+            }
+          }
+        });
+        setEmpresas(empresasUnicas);
       }
-    });
+    },
+    [filters],
+  );
 
-    setEmpresas(nombresUnicos);
-  };
+  // --- Funciones para Búsquedas Recientes ---
 
-  const [searchText, setSearchText] = useState("");
-
-  const [busquedasRecientes, setBusquedasRecientes] = useState([]);
-
-  const cargarBusquedasRecientes = async () => {
+  const cargarBusquedasRecientes = useCallback(async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("busquedasRecientes");
-      const busquedas = jsonValue != null ? JSON.parse(jsonValue) : [];
-      setBusquedasRecientes(busquedas);
+      let busquedasGuardadas = [];
+      if (jsonValue != null) {
+        try {
+          busquedasGuardadas = JSON.parse(jsonValue);
+        } catch (parseError) {
+          console.error(
+            "Error al parsear búsquedas recientes en carga:",
+            parseError,
+          );
+          busquedasGuardadas = [];
+        }
+      }
+      const validBusquedas = busquedasGuardadas.filter(
+        (b) => b && typeof b === "object" && b.Nombre,
+      );
+      setBusquedasRecientes(validBusquedas);
     } catch (e) {
-      console.error("Error cargando búsquedas recientes:", e);
+      console.error("Error al cargar búsquedas recientes de AsyncStorage:", e);
     }
-  };
+  }, []);
 
   useEffect(() => {
     cargarBusquedasRecientes();
-  }, []);
+  }, [cargarBusquedasRecientes]);
 
   const borrarBusquedasRecientes = async () => {
-    await AsyncStorage.removeItem("busquedasRecientes");
-    setBusquedasRecientes([]);
+    Alert.alert(
+      "Confirmar",
+      "¿Estás seguro de que quieres borrar todas las búsquedas recientes?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Borrar",
+          onPress: async () => {
+            await AsyncStorage.removeItem("busquedasRecientes");
+            setBusquedasRecientes([]);
+            Alert.alert("Éxito", "Búsquedas recientes borradas.");
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
-  const [mostrarRecientes, setMostrarRecientes] = useState(true);
+  useEffect(() => {
+    if (searchText.trim() === "") {
+      setEmpresas([]);
+      cargarBusquedasRecientes();
+      setMostrarRecientes(true);
+    } else {
+      buscarEmpresas(searchText); //
+      setMostrarRecientes(false); //
+    }
+  }, [searchText, filters, buscarEmpresas, cargarBusquedasRecientes]);
 
   return (
     <View style={styles.container}>
@@ -196,145 +296,175 @@ export default function Search() {
         <Ionicons
           name="search"
           size={20}
-          color="gray"
+          color={Colors.mediumBlue}
           style={styles.searchIcon}
         />
         <TextInput
-          placeholder="Hinted search text"
+          placeholder="Busca negocios o servicios..."
+          placeholderTextColor={Colors.mediumBlue}
           style={styles.searchInput}
           value={searchText}
-          onChangeText={(text) => {
-            setSearchText(text);
-
-            if (text.trim() === "") {
-              setEmpresas([]);
-              cargarBusquedasRecientes();
-              setMostrarRecientes(true);
-            } else {
-              buscarEmpresas(text);
-              setMostrarRecientes(false);
-            }
-          }}
+          onChangeText={setSearchText}
         />
         <TouchableOpacity onPress={openFilters}>
-          <Ionicons name="list" size={24} color="black" />
+          <Ionicons name="filter" size={24} color={Colors.mediumBlue} />
         </TouchableOpacity>
       </View>
 
       {/* Busquedas recientes */}
       {mostrarRecientes && busquedasRecientes.length > 0 && (
-        <View style={{ marginBottom: 16 }}>
-          {busquedasRecientes.map((busqueda, index) => (
+        <View style={styles.recentSearchesSection}>
+          <View style={styles.recentSearchesHeader}>
+            <Text style={styles.recentSearchesTitle}>Búsquedas Recientes</Text>
+            <TouchableOpacity onPress={borrarBusquedasRecientes}>
+              <Text style={styles.clearRecentSearchesText}>Borrar todo</Text>
+            </TouchableOpacity>
+          </View>
+          {busquedasRecientes.map((empresa, index) => (
             <TouchableOpacity
-              key={index}
+              key={empresa.idEmpresa || `recent-${empresa.Nombre}-${index}`} // Clave más robusta
               style={styles.empresaItem}
               onPress={() => {
-                navigation.navigate("/planes", {});
+                setSearchText(empresa.Nombre); // Rellena la barra de búsqueda
+                router.push({
+                  pathname: `/planes/${empresa.RutaDestino || "planBasico"}`, // Fallback por si no hay RutaDestino
+                  params: {
+                    title: empresa.Nombre,
+                    description:
+                      empresa.Descripcion || "Sin descripción disponible.",
+                    direccion: `${empresa.Calle || ""} ${empresa.NumExt || ""}${empresa.NumInt ? ", Int. " + empresa.NumInt : ""}, ${empresa.Colonia || ""}, CP: ${empresa.CodigoPost || ""}`,
+                    imageUrl:
+                      empresa.Portada ||
+                      imagenesEmpresas[empresa.Nombre] ||
+                      "https://via.placeholder.com/300x200",
+                  },
+                });
               }}
             >
-              <Text>{busqueda}</Text>
-              <Ionicons name="reload" size={20} />
+              <Text style={styles.empresaItemText}>{empresa.Nombre}</Text>
+              <Ionicons name="arrow-undo" size={20} color={Colors.mediumBlue} />
             </TouchableOpacity>
           ))}
         </View>
       )}
 
-      {/* Lista de empresas */}
-      <FlatList
-        data={empresas}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => {
-          const esReciente = busquedasRecientes
-            .map((b) => b.toLowerCase().trim())
-            .includes(item.toLowerCase().trim());
+      {/* Lista de empresas resultantes de la búsqueda */}
+      {empresas.length > 0 && !mostrarRecientes ? (
+        <FlatList
+          data={empresas}
+          keyExtractor={(item) =>
+            item.idEmpresa
+              ? item.idEmpresa.toString()
+              : item.Nombre + Math.random()
+          }
+          renderItem={({ item }) => {
+            if (!item || !item.Nombre) return null; // Renderiza nulo si el item no es válido
 
-          return (
-            <TouchableOpacity
-              style={styles.empresaItem}
-              onPress={() => {
-                navigation.navigate("/planes", {});
-                guardarBusquedaReciente(item);
-              }}
-            >
-              <Text>{item}</Text>
-              <Ionicons
-                name={esReciente ? "reload" : "chevron-forward"}
-                size={20}
-              />
-            </TouchableOpacity>
-          );
-        }}
-      />
+            return (
+              <TouchableOpacity
+                style={styles.empresaItem}
+                onPress={() => {
+                  guardarBusquedaReciente(item.Nombre, item); // Guarda el objeto completo
+                  router.push({
+                    pathname: `/planes/${item.RutaDestino || "planBasico"}`, // Fallback
+                    params: {
+                      title: item.Nombre,
+                      description:
+                        item.Descripcion || "Sin descripción disponible.",
+                      direccion: `${item.Calle || ""} ${item.NumExt || ""}${item.NumInt ? ", Int. " + item.NumInt : ""}, ${item.Colonia || ""}, CP: ${item.CodigoPost || ""}`,
+                      imageUrl:
+                        item.Portada ||
+                        imagenesEmpresas[item.Nombre] ||
+                        "https://via.placeholder.com/300x200",
+                    },
+                  });
+                }}
+              >
+                <Text style={styles.empresaItemText}>{item.Nombre}</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={Colors.mediumBlue}
+                />
+              </TouchableOpacity>
+            );
+          }}
+        />
+      ) : (
+        // Mensaje cuando no hay resultados de búsqueda y no se muestran las recientes
+        !mostrarRecientes &&
+        searchText.trim() !== "" && (
+          <Text style={styles.noResultsText}>
+            No se encontraron resultados.
+          </Text>
+        )
+      )}
 
       {/* Modal de Filtros */}
-      <Modal visible={showFilters} animationType="slide">
-        <View style={{ flex: 1, padding: 30, marginTop: 10 }}>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Text style={{ fontSize: 24, fontWeight: "bold" }}>Filters</Text>
-            <TouchableOpacity
-              onPress={() => {
-                setFilters(filtersBackup);
-                setShowFilters(false);
-              }}
-            >
-              <Ionicons name="close" size={24} color="black" />
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={cancelFilters} // Permite cerrar el modal con el botón de retroceso de Android
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Filtros</Text>
+            <TouchableOpacity onPress={cancelFilters}>
+              <Ionicons name="close" size={28} color={Colors.darkBlue} />
             </TouchableOpacity>
           </View>
 
-          <View
-            style={{
-              marginTop: 16,
-              alignSelf: "flex-start",
-              flexDirection: "left",
-            }}
-          >
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#f44336" }]}
-              onPress={async () => {
-                await borrarBusquedasRecientes();
-                alert("Búsquedas recientes borradas");
-              }}
-            >
-              <Text style={{ color: "white" }}>Borrar búsquedas recientes</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Lista de filtros */}
-          {filters.map((filter) => (
-            <View key={filter.id} style={styles.filterItem}>
-              <Text>{filter.name}</Text>
-              {filter.canBeDeleted ? (
-                <TouchableOpacity onPress={() => deleteFilter(filter.id)}>
-                  <Ionicons name="trash" size={20} color="red" />
-                </TouchableOpacity>
-              ) : (
+          <ScrollView style={styles.filterListContainer}>
+            {/* Iterar sobre los filtros en el estado `filters` */}
+            {filters.map((filter) => (
+              <View
+                key={filter.id === null ? "all" : filter.id.toString()} // Clave única para "Todas" y otras categorías
+                style={styles.filterItemModal}
+              >
+                <Text style={styles.filterItemText}>{filter.name}</Text>
                 <Switch
-                  value={filter.active}
+                  trackColor={{
+                    false: Colors.lightBeige,
+                    true: Colors.darkBlue,
+                  }} // Colores para el track
+                  thumbColor={Colors.veryLightBeige} // Color del thumb
+                  ios_backgroundColor={Colors.mediumBlue} // Fondo para iOS cuando está desactivado
                   onValueChange={() => handleFilterClick(filter.id)}
+                  value={filter.active}
                 />
-              )}
-            </View>
-          ))}
+              </View>
+            ))}
+          </ScrollView>
 
-          {/* Botones */}
-          <View style={styles.buttonRow}>
+          {/* Botones del Modal */}
+          <View style={styles.modalButtonRow}>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#ccc" }]}
-              onPress={() => {
-                setFilters(filtersBackup);
-                setShowFilters(false);
-              }}
+              style={[
+                styles.modalButton,
+                { backgroundColor: Colors.lightBeige },
+              ]}
+              onPress={cancelFilters}
             >
-              <Text>Cancelar</Text>
+              <Text
+                style={[styles.modalButtonText, { color: Colors.darkBlue }]}
+              >
+                Cancelar
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#4CAF50" }]}
-              onPress={() => setShowFilters(false)}
+              style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+              onPress={applyFilters}
             >
-              <Text style={{ color: "white" }}>Guardar</Text>
+              <Text
+                style={[
+                  styles.modalButtonText,
+                  { color: Colors.veryLightBeige },
+                ]}
+              >
+                Aplicar Filtros
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -344,60 +474,129 @@ export default function Search() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50, paddingHorizontal: 30 },
-  header: {
-    flexDirection: "center",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.veryLightBeige, // Fondo de la pantalla principal
   },
-  headerText: { fontSize: 24, fontWeight: "bold" },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#eee",
+    backgroundColor: Colors.lightBeige, // Color de la barra de búsqueda
     borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3, // Sombra para Android
   },
-  searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1 },
-  lastSearchButton: {
-    alignSelf: "flex-start",
-    backgroundColor: "#ddd",
-    padding: 8,
-    borderRadius: 6,
-    marginBottom: 16,
+  searchIcon: { marginRight: 10 },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.darkBlue, // Color del texto de entrada
+  },
+  recentSearchesSection: {
+    marginBottom: 20,
+  },
+  recentSearchesHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  recentSearchesTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: Colors.darkBlue,
+  },
+  clearRecentSearchesText: {
+    color: Colors.mediumBlue,
+    fontSize: 14,
   },
   empresaItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    alignItems: "center",
+    backgroundColor: Colors.lightBeige,
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2, // Sombra para Android
   },
-  filterItem: {
+  empresaItemText: {
+    fontSize: 16,
+    color: Colors.darkBlue,
+    flex: 1,
+  },
+  noResultsText: {
+    textAlign: "center",
+    marginTop: 30,
+    fontSize: 16,
+    color: Colors.mediumBlue,
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 25,
+    paddingTop: 50, // Ajuste para iOS notches/status bar
+    backgroundColor: Colors.veryLightBeige,
+  },
+  modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 18,
-    borderBottomColor: "#ddd",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: Colors.darkBlue,
+  },
+  filterListContainer: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  filterItemModal: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomColor: Colors.lightBeige,
     borderBottomWidth: 1,
   },
-  buttonRow: {
-    marginTop: 30,
+  filterItemText: {
+    fontSize: 18,
+    color: Colors.darkBlue,
+  },
+  modalButtonRow: {
     flexDirection: "row",
     justifyContent: "space-around",
+    paddingVertical: 10,
+    borderTopColor: Colors.lightBeige,
+    borderTopWidth: 1,
   },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  modalButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 30,
     borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3, // Sombra para Android
   },
-  addFilterButton: {
-    backgroundColor: "#eee",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

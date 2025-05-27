@@ -44,14 +44,7 @@ export default function Layout() {
             fontWeight: "bold",
             fontSize: 28,
           },
-          // 👇 Eliminado el menú hamburguesa
-          // headerLeft: () => (
-          //   <View className="items-center justify-center ml-3">
-          //     <TouchableOpacity onPress={() => alert("Menu")}>
-          //       <Feather name="menu" size={24} color={Colors.veryLightBeige} />
-          //     </TouchableOpacity>
-          //   </View>
-          // ),
+
           headerRight: () => (
             <View className="items-center justify-center mr-3 rounded-full bg-mediumBlue p-2">
               <TouchableOpacity
@@ -97,7 +90,7 @@ export default function Layout() {
         <Tabs.Screen
           name="Home"
           options={{
-            title: "Home",
+            title: "Inicio",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="home" size={size} color={color} />
             ),
@@ -107,17 +100,17 @@ export default function Layout() {
         <Tabs.Screen
           name="Search"
           options={{
-            title: "Search",
+            title: "Buscar",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="search1" size={size} color={color} />
             ),
-            headerTitle: "Search",
+            headerTitle: "Buscar",
           }}
         />
         <Tabs.Screen
           name="Settings"
           options={{
-            title: "Settings",
+            title: "Configuración",
             tabBarIcon: ({ color, size }) => (
               <AntDesign name="setting" size={size} color={color} />
             ),

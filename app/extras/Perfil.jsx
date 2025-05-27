@@ -26,7 +26,7 @@ export default function Perfil() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Mi Perfil",
+      title: "Mi perfil",
       headerStyle: { backgroundColor: "#282d33" },
       headerTintColor: "#F5EFE7",
       headerTitleAlign: "center",

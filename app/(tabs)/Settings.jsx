@@ -44,21 +44,15 @@ export default function SettingsScreen() {
           </Text>
           <View className="bg-[#2a2e33] rounded-xl p-4 mb-4">
             <SettingsRow
-              icon="account-outline"
-              text="Cuenta"
-              onPress={() => navigateTo("/extras/Perfil")}
-            />
-            <View className="border-b border-[#3a3f44] my-2" />
-            <SettingsRow
               icon="bell-outline"
               text="Notificaciones"
-              onPress={() => navigateTo("/settings/notifications")}
+              onPress={() => navigateTo("/settings/notificaciones")}
             />
             <View className="border-b border-[#3a3f44] my-2" />
             <SettingsRow
               icon="gift-outline"
               text="Cupones"
-              onPress={() => navigateTo("/settings/coupons")}
+              onPress={() => navigateTo("/settings/cupones")}
             />
             <View className="border-b border-[#3a3f44] my-2" />
             <SettingsRow
@@ -87,13 +81,7 @@ export default function SettingsScreen() {
             <SettingsRow
               icon="alert-circle-outline"
               text="Reportar un bug"
-              onPress={() => navigateTo("/feedback/report-bug")}
-            />
-            <View className="border-b border-[#3a3f44] my-2" />
-            <SettingsRow
-              icon="send-outline"
-              text="Enviar comentarios"
-              onPress={() => navigateTo("/feedback/send-feedback")}
+              onPress={() => navigateTo("/settings/report-bug")}
             />
           </View>
         </ScrollView>

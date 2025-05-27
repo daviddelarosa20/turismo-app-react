@@ -305,7 +305,7 @@ export default function Asientos() {
           className="mt-8 bg-green-600 p-4 rounded-lg w-4/5 items-center"
         >
           <Text className="text-white text-center font-bold text-lg">
-            Confirmar Selección
+            Confirmar selección
           </Text>
         </TouchableOpacity>
       </ScrollView>

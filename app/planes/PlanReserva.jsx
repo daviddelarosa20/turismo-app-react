@@ -24,13 +24,6 @@ export default function PlanReserva() {
       headerStyle: { backgroundColor: "#282d33" },
       headerTintColor: "#F5EFE7",
       headerTitleAlign: "center",
-      headerRight: () => (
-        <View className="mr-3 p-2 rounded-full bg-slate-700">
-          <TouchableOpacity onPress={() => alert("Perfil")}>
-            <AntDesign name="user" size={24} color="#F5EFE7" />
-          </TouchableOpacity>
-        </View>
-      ),
     });
   }, [navigation, title]);
 

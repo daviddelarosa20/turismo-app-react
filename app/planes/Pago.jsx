@@ -152,7 +152,7 @@ export default function Pago() {
           {/* Costo Final */}
           <View className="mb-8 items-center">
             <Text className="text-lg font-bold text-lightBeige-400">
-              Costo Final: ${costo.toFixed(2)}
+              Costo final: ${costo.toFixed(2)}
             </Text>
           </View>
 

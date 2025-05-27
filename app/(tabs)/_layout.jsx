@@ -32,7 +32,6 @@ export default function Layout() {
 
     getUserSession();
   }, []);
-
   return (
     <>
       <StatusBar style="light" />

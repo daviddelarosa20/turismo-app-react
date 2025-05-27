@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Linking,
   ImageBackground,
-  Alert,
 } from "react-native";
 import { useNavigation } from "expo-router";
 import { useLayoutEffect, useState, useEffect } from "react";
@@ -101,27 +100,7 @@ export default function PlanBasico() {
           </Text>
           <View className="flex-row items-center mb-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <TouchableOpacity
-                key={i}
-                onPress={() => {
-                  if (rating !== 0 && rating !== i) {
-                    Alert.alert(
-                      "Cambiar calificación",
-                      "Ya seleccionaste una calificación. ¿Deseas cambiarla?",
-                      [
-                        { text: "Cancelar", style: "cancel" },
-                        {
-                          text: "Sí",
-                          onPress: () => setRating(i),
-                        },
-                      ],
-                      { cancelable: true },
-                    );
-                  } else if (rating === 0) {
-                    setRating(i);
-                  }
-                }}
-              >
+              <TouchableOpacity key={i} onPress={() => setRating(i)}>
                 <AntDesign
                   name={i <= rating ? "star" : "staro"}
                   size={24}
@@ -183,7 +162,9 @@ export default function PlanBasico() {
           </Text>
           <Text className="text-lightBeige-400 text-center mt-2 text-lg font-normal">
             {empresa
-              ? `${empresa.Calle} ${empresa.NumExt}${empresa.NumInt ? ", Int. " + empresa.NumInt : ""}, ${empresa.Colonia}, ${empresa.CodigoPost}, ${empresa.Ciudad}`
+              ? `${empresa.Calle} ${empresa.NumExt}${
+                  empresa.NumInt ? ", Int. " + empresa.NumInt : ""
+                }, ${empresa.Colonia}, ${empresa.CodigoPost}, ${empresa.Ciudad}`
               : "Dirección no disponible"}
           </Text>
 

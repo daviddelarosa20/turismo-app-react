@@ -45,7 +45,6 @@ export default function Evento() {
               Eventos disponibles
             </Text>
             <View className="gap-y-4">
-              {" "}
               {/* Usamos solo gap-y para el espaciado vertical */}
               {eventos.map((evento, index) => (
                 <TouchableOpacity

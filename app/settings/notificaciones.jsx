@@ -79,7 +79,7 @@ export default function Notificaciones() {
                   name="notifications-outline"
                   size={22}
                   color="#1F2A38"
-                />{" "}
+                />
                 {/* A soft white color for the icon */}
               </View>
               <View className="flex-1">

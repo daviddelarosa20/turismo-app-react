@@ -89,7 +89,7 @@ export default function Cupones() {
                   size={24}
                   color="#"
                   className="mr-3"
-                />{" "}
+                />
                 {/* Gold icon for coupons */}
                 <Text className="text-xl font-bold  flex-1">
                   {coupon.title}

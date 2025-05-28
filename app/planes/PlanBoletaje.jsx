@@ -81,7 +81,7 @@ export default function PlanBoletaje() {
           <View className="items-center mb-8">
             <Text className="text-3xl font-bold text-veryLightBeige-500 mb-2">
               {title}
-            </Text>{" "}
+            </Text>
             {/* Texto claro */}
             <View className="flex-row items-center mb-4">
               {valoracion?.Valoracion && (
@@ -92,7 +92,6 @@ export default function PlanBoletaje() {
                 />
               )}
               <Text className="text-xl font-bold ml-2 text-lightBeige-400">
-                {" "}
                 {/* Texto beige */}
                 {valoracion?.Valoracion}
               </Text>
